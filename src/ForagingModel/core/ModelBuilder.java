@@ -1,0 +1,78 @@
+package ForagingModel.core;
+
+import java.io.File;
+import java.util.List;
+
+import ForagingModel.agent.AgentFactory;
+import ForagingModel.input.CellData;
+import ForagingModel.input.InputFactory;
+import ForagingModel.input.ResourceLandscapeReader;
+import ForagingModel.output.OutputFactory;
+import ForagingModel.predator.PredatorFactory;
+import ForagingModel.predator.PredatorManager;
+import ForagingModel.schedule.ScheduleFactory;
+import ForagingModel.schedule.Scheduler;
+import ForagingModel.space.LocationManager;
+import ForagingModel.space.ResourceAssemblage;
+import ForagingModel.space.SpaceFactory;
+import ForagingModel.core.NdPoint;
+
+public class ModelBuilder 
+{
+	public Model build() 
+	{
+		Model model;
+		Parameters params = Parameters.get();
+		if (params.areParametersValid())
+		{
+			// reset MovementMapper before anything created to release any previous simulation
+			ModelEnvironment.getMovementMapper().reset();
+			
+			// create scheduler
+			Scheduler scheduler = ScheduleFactory.createScheduler();
+
+			ResourceLandscapeReader reader = InputFactory.createResourceLandscapeReader();
+
+			// create predators (could be none)
+			// predators created first because need to use borderless resource file, and want landscape size to be correct
+			List<CellData> resourceDataForPredGeneration = reader.readLandscapeFile(params.getResourceLandscapeFile(), 0); // 0 = no border
+			ResourceAssemblage resourcesForPredGeneration = (resourceDataForPredGeneration == null) 
+					? SpaceFactory.generateTwoPatchResource(ScheduleFactory.createNoOpScheduler()) // not possible to have empty border
+					: SpaceFactory.generateResource(resourceDataForPredGeneration, ScheduleFactory.createNoOpScheduler());
+			PredatorManager predatorManager = PredatorFactory.createPredatorManager(resourcesForPredGeneration, scheduler);
+			
+			
+			// load resources data from file (may be null if no file)
+			List<CellData> resourceData = reader.readLandscapeFile(params.getResourceLandscapeFile(), params.getEmptyBorderSize());
+			
+			// create resources, sets landscape size
+			ResourceAssemblage resources = (resourceData == null) ? SpaceFactory.generateTwoPatchResource(scheduler) // not possible to have empty border
+																  : SpaceFactory.generateResource(resourceData, scheduler);
+	
+			// to track forager
+			LocationManager locationManager = SpaceFactory.createLocationManager(); 
+			
+			// add forager to random location or location specified by start points file
+			NdPoint startingLocation = params.getStartingLocation();
+			AgentFactory.createAndPlaceForager(locationManager, resources, predatorManager,
+					startingLocation, scheduler);
+			
+			// visualization
+			if (params.getVisualizeSimulation())
+			{
+				OutputFactory.createSimulationVisualizer(resources, locationManager, predatorManager, scheduler);
+			}
+			
+			File results = params.getResultsFile();
+			OutputFactory.createSimulationReporter(results, locationManager.getAgents(), resources.getNumPercentileBins(), scheduler);
+			
+			model = new DefaultModel(scheduler, params.getIntervalSize(), params.getNumSteps());
+		}
+		else
+		{
+			model = new InvalidModel("Invalid parameter combo: " + params.toString());
+		}
+		return model;
+	}
+
+}

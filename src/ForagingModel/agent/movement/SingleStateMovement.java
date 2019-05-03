@@ -1,0 +1,69 @@
+package ForagingModel.agent.movement;
+
+import java.util.Set;
+
+import ForagingModel.agent.Recorder;
+import ForagingModel.core.NdPoint;
+import ForagingModel.core.Velocity;
+import ForagingModel.predator.PredatorManager;
+
+public class SingleStateMovement implements MovementBehavior 
+{
+	private MovementProcess movement;
+	private Recorder recorder;
+	private PredatorManager predators;
+	private double predatorEncounterRadius;
+	private boolean encounteredPredator;
+	private BehaviorState state;
+
+	protected SingleStateMovement(MovementProcess movement, Recorder recorder,
+			PredatorManager predators, double predatorEncounterRadius)
+	{
+		this.movement = movement;
+		this.recorder = recorder;
+		this.predators = predators;
+		this.predatorEncounterRadius = predatorEncounterRadius;
+		encounteredPredator = false;
+	}
+	
+	@Override
+	public Velocity getNextVelocity(NdPoint currentLocation, double currentConsumptionRate) 
+	{
+		Set<NdPoint> encounters = predators.getActivePredators(currentLocation, predatorEncounterRadius);
+
+		Velocity velocity;
+		if (encounters.size() > 0)
+		{
+			// take evasive action if encountered predators
+			velocity = movement.getEscapeVelocity(currentLocation, encounters);
+			encounteredPredator = true;
+			state = BehaviorState.Escape;
+		}
+		else
+		{
+			// null since previous velocity only matters for state change
+			velocity = movement.getNextVelocity(currentLocation, false, null);
+			encounteredPredator = false;
+			state = BehaviorState.SingleState;
+		}
+		
+		recorder.recordPredatorEncounters(encounters); //encounters here before moving
+		recorder.recordVelocity(velocity);
+		recorder.recordState(getState());
+		
+		return velocity;
+	}
+
+	@Override
+	public BehaviorState getState() 
+	{
+		return state;
+	}
+
+	@Override
+	public boolean encounteredPredator() 
+	{
+		return encounteredPredator;
+	}
+
+}
