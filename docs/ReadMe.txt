@@ -54,4 +54,10 @@ Steps:
 5. Edit run configurations in eclipse
 	add VM argument for rJava (e.g., -Djava.library.path=/Library/Frameworks/R.framework/Resources/library/rJava/jri/)
 	add environment variable R_HOME for R (e.g., /Library/Frameworks/R.framework/Resources)
+	
+Troubleshooting tips:
+on macOS, may need to run the following:
+- xcode-select --install (after xcode install or upgrade to get command line tools working)
+- sudo R CMD javareconf (after java install, see https://github.com/rstudio/rstudio/issues/2254)
+- system.file("jri",package="rJava") (to get location of jri to add as VM argument)
 

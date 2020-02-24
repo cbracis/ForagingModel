@@ -1,0 +1,353 @@
+# Random landscape generation
+
+Trying to generate random landscapes from homogeneous gradient to very patchy, 
+as well as have a metric to describe the heterogenaity.
+
+```{r}
+library(RandomFields) # generate Gaussian random fields
+library(geoR) # matern covariance function
+library(spdep) # Moran's I
+library(fractaldim) # fractal dimension
+
+```
+
+## Examples
+
+First try the examples to generate gaussian random fields
+
+All models
+```{r}
+PrintModelList()
+```
+
+
+symmetric stable model, also called "powered exponential model"
+```{r}
+model <- "stable"
+mean <- 0
+variance <- 4
+nugget <- 1
+scale <- 10
+alpha <- 1 ## see help("CovarianceFct") for additional
+## parameters of the covariance functions
+step <- 1 ## nicer, but also time consuming if step <- 0.1
+x <- seq(0, 50, step)
+y <- seq(0, 50, step)
+f <- GaussRF(x=x, y=y, model=model, grid=TRUE,
+param=c(mean, variance, nugget, scale, alpha))
+image(x, y, f)
+```
+
+Brownian motion (using Stein’s method)
+```{r}
+step <- 0.3 ## nicer, but also time consuming if step = 0.1
+x <- seq(0, 20, step)
+kappa <- 1 # in [0,2)
+z <- GaussRF(x=x, y=x, grid=TRUE, model=list("fractalB", kappa))
+image(z,zlim=c(-3,3))
+```
+
+
+Matern
+```{r}
+step = 1
+x = seq(0, 50, step)
+z = GaussRF(x = x, y = x, grid = TRUE, model = "matern", param = c(mean=0, variance=1, nugget=0, scale=1, nu=0.1))
+image(z)
+```
+
+Now try manipulate for different parameters
+```{r}
+library(manipulate)
+library(RandomFields) # generate Gaussian random fields
+library(fields) # image.plot
+habitatCols = c(colorRampPalette(c("gainsboro", "darkolivegreen3"))(10), colorRampPalette(c("darkolivegreen3", "darkolivegreen"))(64))
+
+plotMatern = function(mean, scale, nu)
+{
+	x = seq(0, 50, 1)
+	z = GaussRF(x = x, y = x, grid = TRUE, model = "matern", param = c(mean=mean, variance=1, nugget=0, scale=scale, nu=nu))
+	z = normalizeZ(z)
+	print(range(z))
+	
+	par(mar = c(5, 1, 1, 1))
+	image(z, col = habitatCols)
+	image.plot(legend.only = TRUE, zlim = range(z), horizontal = TRUE, col = habitatCols)
+}
+
+normalizeZ = function(z, total = 1)
+{
+	# make positive
+	z[z < 0] = 0
+	
+	if (sum(z) == 0) print("Invalid field, all 0")
+
+	# sum to one (or other amount for larger landscapes)
+	z = z * total / sum(z) 
+	
+	return(z)
+}
+
+manipulate(plotMatern(mean, scale, nu),
+		   mean = slider(-2.0, 2.0),
+		   scale = slider(0.001, 100),
+		   nu = slider(0.001, 200))
+```
+
+Try model fitting the results for different means (i.e. different amounts cut off to 0)
+```{r,  cache=TRUE}
+	x = seq(0, 50, 1)
+	z = GaussRF(x = x, y = x, grid = TRUE, model = "matern", param = c(mean=2, variance=1, nugget=0, scale=5, nu=1.5))
+	z = normalizeZ(z)
+#	v = fitvario(as.matrix(expand.grid(x, x)), data=z, model="matern", param = c(NA, NA, 0, NA, NA), 
+#				 lower = c(0.1, 0.1, 0.1), upper = c(2, 10, 2))
+#	summary(v)
+```
+
+
+Now generate a bunch and calculate some statistics
+```{r}
+generateLandscape = function(mean, scale, dim = 50, totalSum = 1)
+{
+	x = seq(1, dim, 1) # should be 1 to 50, eg
+	z = NULL
+	
+	tries = 20
+	i = 1
+	while (i < tries)
+	{
+		# matern - nu parameter not interesting
+		# exponential, when nu = 1/2
+		# gauss (aka squared exponential), when nu = inf
+		z = GaussRF(x = x, y = x, grid = TRUE, model = "exponential", param = c(mean=mean, variance=1, nugget=0, scale=scale))
+		if (any(z > 0))
+		{
+			break	
+		}
+		i = i + 1 
+	}
+
+	if (is.null(z))
+	{
+		# TODO, eventually warn and fail gracefully? with uniform landscape
+		stop("z all negative after", tries, "tries")
+	}
+	z = normalizeZ(z, totalSum)	
+	return(z)
+}
+
+plotLandscape = function(z, mean, scale)
+{
+	image(z, col = habitatCols)
+	title( paste("m =", mean, "s =", scale))
+	text(x = 0, y = 49, labels = range(z), pos = 4)
+}
+
+calculateNeighbors = function(x)
+{
+	# for Moran's I since these depend on the size of the grid, not the data
+	coords = as.matrix(expand.grid(x, x))
+	neigh.nb = dnearneigh(coords, 0, 2 * max(x), longlat=FALSE) # warning, this is really slow
+	neigh.dist = nbdists(neigh.nb, coords, longlat=FALSE)
+	inverse = lapply(neigh.dist, function(x) (1/x))
+	class(inverse) = c("nbdist") # class gets lost with lapply, needed?
+	neigh.listw = nb2listw(neigh.nb, glist = inverse, style="W", zero.policy=TRUE) # also slow
+	# what style? 
+	#W is row standardised (sums over all links to n), 
+	#C is globally standardised (sums over all links to n), 
+	#U is equal to C divided by the number of neighbours (sums over all links to unity)
+	szero = Szero(neigh.listw)
+	
+	return(list(nb = neigh.nb, listw = neigh.listw, szero = szero))
+}
+
+calculateMetrics = function(paramData, nReplicates, neighbors = NULL, plot = TRUE)
+{
+	if (is.null(neighbors))
+	{
+		x = seq( from = 1, to = 50, by = 1) # start from 0 or 1?
+		neighbors = calculateNeighbors(x)
+	}
+	
+	paramData = cbind(paramData, sdMean = NA, sdU = NA, sdL = NA,  moransIMean = NA, moransIU = NA, moransIL = NA, fractalMean = NA, fractalU = NA, fractalL = NA)
+	
+	rows = 6
+	cols = 4
+	
+	for (i in 1:nrow(paramData))
+	{
+		land = lapply(1:nReplicates, function(x) generateLandscape(mean = paramData[i, "mean"], 
+																 scale = paramData[i, "scale"]) )
+		
+		if (plot)
+		{
+			if ((i %% (rows * cols)) == 1) 
+			{
+				pdf(file = paste("landParams", (i - 1) / (rows * cols) + 1, ".pdf", sep = ""), width = 8, height = 12)
+				par(mfrow = c(rows, cols), mar = c(1, 1, 3, 1))
+			}
+			
+			plotLandscape(land[[1]], paramData[i, "mean"], paramData[i, "scale"])
+			
+			if ((i %% (rows * cols)) == 0)
+			{
+				dev.off()
+			}
+		}
+		sd = sapply(land, function(x) sd(as.vector(x)))
+		moransI = unlist( sapply(land, function(x) moran(x, neighbors$listw, length(neighbors$nb), neighbors$szero))[1,] )
+		fractal = sapply(land, function(x) fd.estim.isotropic(x, p.index = 1, direction='hv', plot.loglog = FALSE)$fd)
+		
+		paramData[i, 3:11] = c(mean(sd), quantile(sd, probs = c(0.975, 0.025)), 
+							   mean(moransI), quantile(moransI, probs = c(0.975, 0.025)), 
+							   mean(fractal), quantile(fractal, probs = c(0.975, 0.025)))
+	}
+	return(paramData)
+}
+
+evalLandscapeParameters = function(neighbors = NULL)
+{
+	mean = c(-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5)
+	scale = c(0.5, 1:10, 15, 20, 25, 50)
+	
+	landResults = expand.grid(mean = mean, scale = scale)
+	landResults = calculateMetrics(landResults, 20, neighbors)
+	return(landResults)
+}
+
+x = seq( from = 1, to = 50, by = 1) # start from 0 or 1?
+neighbors = calculateNeighbors(x)
+lands = evalLandscapeParameters(neighbors)
+
+plotConf = function(data, colIdx, ylab)
+{
+	require(plotrix)
+	require(RColorBrewer)
+	cols = brewer.pal(10, "BrBG")
+	meanN = as.numeric(factor(data$mean))
+	scaleN = as.numeric(factor(data$scale))
+	upperCI = data[,colIdx + 1]
+	lowerCI = data[,colIdx + 2]
+	xdiff = rep(seq(from = -0.4, to = 0.4, length = length(unique(meanN))), length(unique(scaleN)))
+	
+	plotCI(x = scaleN + xdiff, y = data[,colIdx], ui = upperCI, li = lowerCI, 
+		   col = cols[meanN], sfrac = 0, pch = 16, xlab = "scale", ylab = ylab, xaxt = "n")
+	axis(side = 1, at = scaleN, labels = factor(data$scale))
+	
+	legend("topleft", legend = levels(factor(data$mean)), fill = cols[1:length(unique(meanN))], 
+		   ncol = 3, bty = "n")
+}
+
+plotConf(lands, 3, "Std Dev")
+plotConf(lands, 6, "Moran's I")
+plotConf(lands, 9, "Fractal Dim")
+```
+
+Now to generate some landscapes
+```{r}
+generateLandscapes = function(parameters, neighbors = NULL)
+{
+	if (is.null(neighbors))
+	{
+		x = seq( from = 1, to = 50, by = 1) 
+		neighbors = calculateNeighbors(x)
+	}
+
+	parameters = cbind(parameters, sd = NA, moransI = NA, fractal = NA)
+	
+	for (i in 1:nrow(parameters))
+	{
+		land = generateLandscape(mean = parameters[i, "mean"],
+								 scale = parameters[i, "scale"])
+		parameters[i, "sd"] = sd(as.vector(land))
+		parameters[i, "moransI"] = moran(land, neighbors$listw, length(neighbors$nb), neighbors$szero)$I
+		parameters[i, "fractal"] = fd.estim.isotropic(land, p.index = 1, direction='hv', plot.loglog = FALSE)$fd
+
+		write.csv(land, file = paste("land/land", parameters[i, "id"], ".csv", sep = ""), quote = FALSE, row.names = FALSE)
+	}
+	write.csv(parameters, file = "landParameters.csv", quote = FALSE, row.names = FALSE)
+	return(parameters)
+}
+
+scales = rep(c(1, 1, 5, 5, 5, 20), each = 10 * 5)
+nus = rep(c(1, 100, 1, 2, 100, 2), each = 10 * 5)
+means = rep( c(-1, -0.5, 0, 0.5, 1), times = 6 * 10)
+ids = 1:length(scales)
+params = data.frame(scale = scales, nu = nus, mean = means, id = ids)
+
+#alternatively
+params = expand.grid(mean = c(-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5), scale = c(0.5, 1:10, 15, 20, 25, 50))
+params = params[rep(1:nrow(params), times = 20),]
+params$id = 1:nrow(params)
+
+params = generateLandscapes(params, neighbors)
+
+# create list for properties file
+names = paste("land", 1:2400, ".csv", sep = "")
+cat(names, sep = ";" )
+```
+
+# landscape for introduced predators
+```{r}
+background = generateLandscape(mean = 0, scale = 10, dim = 100) * 4
+better = GaussRF(x = seq(51, 75, 1), y = seq(26, 75, 1), grid = TRUE, 
+				 model = "exponential", param = c(mean=-1.5, variance=1, nugget=0, scale=10))
+better = normalizeZ(better)
+layer = matrix(0, nrow = 100, ncol = 100)
+layer[seq(51, 75, 1), seq(26, 75, 1)] = better
+landscape = background + layer
+plotLandscape(landscape, mean = "var", scale = 10)
+write.csv(landscape, file = "model/land/landPredInt.csv", quote = FALSE, row.names = FALSE)
+
+par(mfrow=c(2,2))
+plotLandscape(as.matrix(read.csv("model/land/landPred.csv", header = TRUE)), mean = "var", scale = "var")
+plotLandscape(as.matrix(read.csv("model/land/landPred2.csv", header = TRUE)), mean = "var", scale = "var")
+plotLandscape(as.matrix(read.csv("model/land/landPredInt.csv", header = TRUE)), mean = "var", scale = "var")
+plotLandscape(t(as.matrix(read.csv("model/land/yellJul2005.csv", header = TRUE)))/1500, mean = "var", scale = "var")
+
+
+# try exponentiating to increase contrast
+plotLandscape(exp(as.matrix(read.csv("model/land/yellJul2005.csv", header = TRUE))*0.02), mean = 0.02, scale = "var")
+plotLandscape(exp(as.matrix(read.csv("model/land/yellJul2005.csv", header = TRUE))*0.03), mean = 0.03, scale = "var")
+plotLandscape(exp(as.matrix(read.csv("model/land/yellJul2005.csv", header = TRUE))*0.04), mean = 0.04, scale = "var")
+plotLandscape(exp(as.matrix(read.csv("model/land/yellJul2005.csv", header = TRUE))*0.05), mean = 0.05, scale = "var")
+```
+
+
+# landscape for naive foragers, 4 levels of patch quality
+```{r}
+# properties of some existing, mean = -1.5, scale = 2, 5, 10, 50
+land18 = read.csv("model/land/land18.csv", header = TRUE)
+land42 = read.csv("model/land/land42.csv", header = TRUE)
+land82 = read.csv("model/land/land82.csv", header = TRUE)
+land114 = read.csv("model/land/land114.csv", header = TRUE)
+lands = list(land18, land42, land82, land114)
+par(mfrow=c(2,2))
+for(i in 1:4)
+{
+		hist(lands[[i]][lands[[i]]>0], main = sum(lands[[i]] == 0)/nrow(lands[[i]])/ncol(lands[[i]]))
+}
+
+layer1 = generateLandscape(mean = -2, scale = 10, dim = 250, totalSum = 10)
+layer2 = generateLandscape(mean = -2, scale = 10, dim = 250, totalSum = 7.5)
+layer3 = generateLandscape(mean = -1.5, scale = 10, dim = 250, totalSum = 5)
+layer4 = generateLandscape(mean = -1.5, scale = 10, dim = 250, totalSum = 2.5)
+layer1[100:150, 100:150] = 0
+layer2[100:150, 100:150] = 0
+landscape = layer1 + layer2 + layer3 + layer4
+landscape = normalizeZ(landscape, total = 25)
+plotLandscape(landscape)
+hist(landscape[landscape>0], main = sum(landscape == 0)/nrow(landscape)/ncol(landscape))
+image(landscape, col = c("white", "black"), breaks = c(-1, 0, 10))
+write.csv(landscape, file = "model/land/landTransLoc.csv", quote = FALSE, row.names = FALSE)
+
+# bigger landscape just 82 stiched together
+landscape82 = NULL
+landscape82 = cbind(land82, land82, land82, land82, land82)
+landscape82 = rbind(landscape82, landscape82, landscape82, landscape82, landscape82)
+write.csv(landscape82, file = "model/land/landTransLoc82.csv", quote = FALSE, row.names = FALSE)
+
+landscape = read.csv("model/land/landTransLoc.csv", header = TRUE)
+landscape82test = read.csv("model/land/landTransLoc82.csv", header = TRUE)
+
+```
