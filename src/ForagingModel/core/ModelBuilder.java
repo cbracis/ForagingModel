@@ -15,7 +15,6 @@ import ForagingModel.schedule.Scheduler;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.ResourceAssemblage;
 import ForagingModel.space.SpaceFactory;
-import ForagingModel.core.NdPoint;
 
 public class ModelBuilder 
 {
@@ -52,10 +51,10 @@ public class ModelBuilder
 			// to track forager
 			LocationManager locationManager = SpaceFactory.createLocationManager(); 
 			
-			// add forager to random location or location specified by start points file
-			NdPoint startingLocation = params.getStartingLocation();
-			AgentFactory.createAndPlaceForager(locationManager, resources, predatorManager,
-					startingLocation, scheduler);
+			// forager start at center or randomly depending on StartPointType
+			int numForagers = params.getForagerNumber();
+			AgentFactory.createAndPlaceForagers(numForagers, locationManager, resources, 
+					predatorManager, scheduler);
 			
 			// visualization
 			if (params.getVisualizeSimulation())

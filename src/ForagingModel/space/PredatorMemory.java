@@ -110,7 +110,7 @@ public class PredatorMemory extends AbstractMemory implements MemoryAssemblage
 
 
 	@Override
-	public void execute(int currentInterval) 
+	public void execute(int currentInterval, int priority) 
 	{
 		decay();
 	}

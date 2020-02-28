@@ -228,7 +228,7 @@ public class ResourceMatrix implements ResourceAssemblage
 	}
 
 	@Override
-	public void execute(int currentInterval) 
+	public void execute(int currentInterval, int priority) 
 	{
 		growResource();
 	}

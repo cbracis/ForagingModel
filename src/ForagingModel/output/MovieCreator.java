@@ -129,7 +129,7 @@ public class MovieCreator implements Schedulable
 		}
 	}
 
-	public void execute(int currentInterval)  
+	public void execute(int currentInterval, int priority)  
 	{
 		createMovie();
 	}

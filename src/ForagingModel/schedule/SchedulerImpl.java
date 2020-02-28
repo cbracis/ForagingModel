@@ -1,6 +1,7 @@
 package ForagingModel.schedule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -131,9 +132,13 @@ public class SchedulerImpl implements Scheduler
 	{
 		for (Integer priority : schedulables.keySet())
 		{
-			for (Schedulable schedulable : schedulables.get(priority))
+			List<Schedulable> schedulablesAtPriority = schedulables.get(priority);
+			// now randomize subset schedulablesAtPriority
+			Collections.shuffle(schedulablesAtPriority);
+			
+			for (Schedulable schedulable : schedulablesAtPriority)
 			{
-				schedulable.execute(currentInterval);
+				schedulable.execute(currentInterval, priority);
 			}
 		}
 	}

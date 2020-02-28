@@ -5,8 +5,10 @@ package ForagingModel.agent;
 
 import ForagingModel.agent.movement.BehaviorState;
 import ForagingModel.agent.movement.MovementBehavior;
+import ForagingModel.core.ForagingModelException;
 import ForagingModel.core.NdPoint;
 import ForagingModel.core.Velocity;
+import ForagingModel.schedule.SchedulePriority;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.ResourceAssemblage;
 
@@ -105,13 +107,23 @@ public class Forager extends Agent implements MovingAgent
 	}
 
 	@Override
-	public void execute(int currentInterval) 
+	public void execute(int currentInterval, int priority) 
 	{
-		// For now, do both move and consume here
-		// With multiple foragers, these will need to be split so all foragers move before consuming
-		move();
-		consumeResource();
-		recorder.recordIteration(); // move to next iteration to record
+		// Move and consume separately so that in the case of multiple foragers all foragers move before consuming
+		// Record as part of consume since that happens last
+		if (SchedulePriority.fromValue(priority).equals(SchedulePriority.ForagerMove))
+		{
+			move();
+		}
+		else if (SchedulePriority.fromValue(priority).equals(SchedulePriority.ForagerConsume))
+		{
+			consumeResource();
+			recorder.recordIteration(); // move to next iteration to record
+		}
+		else
+		{
+			throw new ForagingModelException("Unexpected priority " + priority);
+		}
 	}
 	
 

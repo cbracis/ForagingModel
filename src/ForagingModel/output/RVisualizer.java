@@ -12,13 +12,14 @@ import org.apache.commons.math3.linear.RealVector;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngine;
 import org.rosuda.REngine.REngineException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ForagingModel.agent.Forager;
 import ForagingModel.agent.movement.BehaviorState;
 import ForagingModel.agent.movement.MemoryMovementBehavior;
 import ForagingModel.agent.movement.MovementBehavior;
 import ForagingModel.core.DirectionProbabilityInfo;
-import ForagingModel.core.ForagingModelException;
 import ForagingModel.core.ModelEnvironment;
 import ForagingModel.core.NdPoint;
 import ForagingModel.core.Parameters;
@@ -30,6 +31,8 @@ import ForagingModel.space.SpaceUtils;
 
 public class RVisualizer implements SimulationVisualizer 
 {
+	private final static Logger logger = LoggerFactory.getLogger(RVisualizer.class);
+
 	private ResourceAssemblage resources;
 	private MemoryAssemblage memory;
 	private LocationManager locationManager;
@@ -228,9 +231,10 @@ public class RVisualizer implements SimulationVisualizer
 
 	private void getForager() 
 	{
-		// for now assume we only have 1 forager, will need to update to support multiple
+		// for just plot 1 forager,even if there are multiple
+		// this could be improved
 		List<Forager> foragers = locationManager.getAgents(Forager.class);
-		if (foragers.size() == 1)
+		if (foragers.size() >= 1)
 		{
 			forager = foragers.get(0);
 			
@@ -247,9 +251,10 @@ public class RVisualizer implements SimulationVisualizer
 			}
 			plotMemory = (memory == null) ? false : true;
 		}
-		else
+		if (foragers.size() > 1)
 		{
-			throw new ForagingModelException("Should only be 1 forager, not " + foragers.size());
+			logger.warn("Warning: only forager id={} plotted.", forager.getId());
+
 		}
 	}
 
@@ -272,7 +277,7 @@ public class RVisualizer implements SimulationVisualizer
 		}
 	}
 
-	public void execute(int currentInterval) 
+	public void execute(int currentInterval, int priority) 
 	{
 		if (currentInterval >= numIterationsToSkip)
 		{

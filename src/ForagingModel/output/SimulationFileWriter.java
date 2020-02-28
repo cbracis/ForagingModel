@@ -335,7 +335,7 @@ public class SimulationFileWriter implements SimulationReporter
 	}
 
 	@Override
-	public void execute(int currentInterval) 
+	public void execute(int currentInterval, int priority) 
 	{
 		reportSummaryResults();
 	}

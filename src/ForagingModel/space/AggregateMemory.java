@@ -114,7 +114,7 @@ public class AggregateMemory extends AbstractMemory implements MemoryAssemblage
 	}
 
 	@Override
-	public void execute(int currentInterval) 
+	public void execute(int currentInterval, int priority) 
 	{
 		resourceMemory.decay();
 		predatorMemory.decay();

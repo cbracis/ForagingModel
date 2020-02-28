@@ -21,4 +21,17 @@ public enum SchedulePriority
     { 
         return value; 
     }
+    
+    public static SchedulePriority fromValue(int value)
+    {
+        for (SchedulePriority sp : values()) 
+        {
+            if (sp.value == value)
+            {
+                return sp;
+            }
+        }
+        return null;
+
+    }
 }

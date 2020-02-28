@@ -2,5 +2,5 @@ package ForagingModel.schedule;
 
 public interface Schedulable
 {
-	void execute(int currentInterval);
+	void execute(int currentInterval, int priority);
 }

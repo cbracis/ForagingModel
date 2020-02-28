@@ -39,7 +39,7 @@ public class AbstractMemoryHelper extends AbstractMemory
 	}
 
 	@Override
-	public void execute(int currentInterval) 
+	public void execute(int currentInterval, int priority) 
 	{
 	}
 

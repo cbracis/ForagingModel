@@ -36,18 +36,20 @@ public class AgentFactory
 				recorder, 
 				averageConsumption, consumptionRate, consumptionSpatialScale);
 		space.moveTo(forager, startingLocation);
-		scheduler.register(forager, SchedulePriority.ForagerMove); // use move for now for both move and consume
+		scheduler.register(forager, SchedulePriority.ForagerMove); 
+		scheduler.register(forager, SchedulePriority.ForagerConsume); 
 		
 		return forager;
 	}
 	
 	public static List<Forager> createAndPlaceForagers(int numForagers, LocationManager space, ResourceAssemblage resource, 
-			PredatorManager predatorManager, NdPoint startingLocation, Scheduler scheduler)
+			PredatorManager predatorManager, Scheduler scheduler)
 	{
 		List<Forager> foragers = new ArrayList<Forager>(numForagers);
 		
 		for (int i = 0; i < numForagers; i++)
 		{
+			NdPoint startingLocation = Parameters.get().getStartingLocation();
 			foragers.add(createAndPlaceForager(space, resource, predatorManager, startingLocation, scheduler));
 		}
 		return foragers;

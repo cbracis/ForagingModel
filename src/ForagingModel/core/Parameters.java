@@ -32,6 +32,7 @@ public class Parameters
 							ForagerTauFeeding, // tau[2]
 							ForagerAnglePersistanceSearch, 
 							ForagerAnglePersistanceFeeding,
+							ForagerNumber,
 							IntervalSize, // dt
 							AvgConsumptionIsFullyInformed, // learn avg consumption or calculate from landscape
 							AvgConsumptionLearningRate, // learning rate for avg consumption if learned
@@ -61,6 +62,7 @@ public class Parameters
 							RepeatSimulation,
 							ResourceLandscapeFileName,
 							EmptyBorderSize,
+							StartPointsType,
 							StartPointsFileName,
 							StartPointsIndex,
 							RandomSeed,
@@ -77,7 +79,7 @@ public class Parameters
 							PredatorIntroduction, // for now hard code when on, eventually will need more parameters?
 							FoodSafetyTradeoff}
 	
-	public enum ParameterType { Integer, Long, Boolean, Double, UnitInterval, String, MovementProcess, MovementType, DirectionUpdaterType };
+	public enum ParameterType { Integer, Long, Boolean, Double, UnitInterval, String, MovementProcess, MovementType, DirectionUpdaterType, StartPointsType };
 	
 	private static Parameters parameters;
 	
@@ -112,6 +114,9 @@ public class Parameters
 
 		values.put( Parameter.LandscapeSizeY, 50 );
 		types.put( Parameter.LandscapeSizeY, ParameterType.Integer );
+
+		values.put( Parameter.ForagerNumber, 1 );
+		types.put( Parameter.ForagerNumber, ParameterType.Integer );
 
 		values.put( Parameter.ForagerSpeedSearch, 2.0 );
 		types.put( Parameter.ForagerSpeedSearch, ParameterType.Double );
@@ -217,6 +222,9 @@ public class Parameters
 
 		values.put( Parameter.EmptyBorderSize, 0 );
 		types.put( Parameter.EmptyBorderSize, ParameterType.Integer );
+
+		values.put( Parameter.StartPointsType, StartPointsType.Center );
+		types.put( Parameter.StartPointsType, ParameterType.StartPointsType );
 
 		values.put( Parameter.StartPointsFileName, "" );
 		types.put( Parameter.StartPointsFileName, ParameterType.String );
@@ -402,6 +410,12 @@ public class Parameters
 	{
 		return (Double) values.get(Parameter.IntervalSize);
 	}
+	
+	public int getForagerNumber()
+	{
+		return (Integer) values.get(Parameter.ForagerNumber);
+	}
+
 
 	public double getForagerSpeedSearch()
 	{
@@ -590,6 +604,11 @@ public class Parameters
 		return (Integer) values.get(Parameter.EmptyBorderSize);
 	}
 
+	public StartPointsType getStartPointsType()
+	{
+		return StartPointsType.valueOf(values.get(Parameter.StartPointsType).toString());
+	}
+
 	public File getStartPointsFile() 
 	{
 		String fileName = (String) values.get(Parameter.StartPointsFileName);
@@ -743,9 +762,11 @@ public class Parameters
 	 */
 	public NdPoint getStartingLocation()
 	{
-		NdPoint startingLocation;
-		if (startPoints == null)
+		NdPoint startingLocation = null;
+		
+		switch (getStartPointsType())
 		{
+		case Center:
 			double startX;
 			double startY;
 			
@@ -757,25 +778,28 @@ public class Parameters
 			}
 			else
 			{
-				// start in center rather than random
 				startX = (getMaxDimensionX() - getMinDimension()) / 2;
 				startY = (getMaxDimensionY() - getMinDimension()) / 2;
-				
-				// random
-				//NumberGenerator generator = ModelEnvironment.getNumberGenerator();
-				//startingLocation = new NdPoint(generator.nextDoubleFromTo(0, getLandscapeSize()), generator.nextDoubleFromTo(0, getLandscapeSize()));
-			}
-			
+			}			
 			startingLocation = new NdPoint(startX, startY);
-		}
-		else
-		{
+			
+			break;
+		case Random:
+			NumberGenerator generator = ModelEnvironment.getNumberGenerator();
+			startingLocation = new NdPoint(generator.nextDoubleFromTo(0, getLandscapeSizeX()), generator.nextDoubleFromTo(0, getLandscapeSizeY()));
+			break;
+		case FromFile:
 			if (getStartPointsIndex() >= startPoints.size())
 			{
 				throw new ForagingModelException(String.format("Requested start point %d, but only %d start points read from file", getStartPointsIndex(), startPoints.size()));
 			}
 			startingLocation = startPoints.get(getStartPointsIndex());
+
+			break;
+		default:
+			throw new ForagingModelException("Unhandled StartPointsType " + getStartPointsType());
 		}
+	
 		return startingLocation;
 	}
 	
