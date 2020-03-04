@@ -342,6 +342,9 @@ public class Parameters
 		case DirectionUpdaterType:
 			parsedValue = DirectionUpdaterType.valueOf( value );
 			break;
+		case StartPointsType:
+			parsedValue = StartPointsType.valueOf( value );
+			break;
 		default:
 			throw new ForagingModelException( "Parameter not found: " + parameter );
 		}
