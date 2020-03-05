@@ -18,6 +18,8 @@ import ForagingModel.agent.Forager;
 import ForagingModel.agent.Reporter;
 import ForagingModel.agent.Reporter.SummaryMetric;
 import ForagingModel.agent.movement.BehaviorState;
+import ForagingModel.agent.movement.MemoryMovementBehavior;
+import ForagingModel.agent.movement.MovementBehavior;
 import ForagingModel.core.ForagingModelException;
 import ForagingModel.core.ModelEnvironment;
 import ForagingModel.core.NdPoint;
@@ -25,6 +27,7 @@ import ForagingModel.core.Parameters;
 import ForagingModel.core.Parameters.Parameter;
 import ForagingModel.core.Velocity;
 import ForagingModel.predator.Predator;
+import ForagingModel.space.MemoryAssemblage;
 
 public class SimulationFileWriter implements SimulationReporter 
 {
@@ -173,6 +176,7 @@ public class SimulationFileWriter implements SimulationReporter
 		{
 			reportTracks();
 			reportPredators();
+			reportMemory();
 		}
 	}
 	
@@ -240,6 +244,43 @@ public class SimulationFileWriter implements SimulationReporter
 		}
 		
 		writeToFile(results, encountersFile, false);
+	}
+	
+	public void reportMemory()
+	{
+		// foragers
+		for (Agent agent : agents)
+		{
+			if (agent instanceof Forager)
+			{
+				Forager forager = (Forager) agent;
+				int id = forager.getId();		
+
+				// get memory
+				MemoryAssemblage memory = null;
+				MovementBehavior behavior = ModelEnvironment.getMovementMapper().getMovement(forager);
+				if (behavior != null && behavior instanceof MemoryMovementBehavior)
+				{
+					memory = ((MemoryMovementBehavior) behavior).getMemory();
+					double[][] memoryValues = memory.reportCurrentState();
+					
+					File memFile = new File(tracksFolder, "Memory_sim=" + ModelEnvironment.getSimulationIndex() + 
+							"_id=" + id + ".csv");
+					
+					List<String[]> matrix = new ArrayList<String[]>();
+					
+					for (double[] row : memoryValues)
+					{
+						// slightly circular, we split on comma to make an array, then the CSVWriter will put the commas back
+						String[] line = Arrays.toString(row).replace("[", "").replace("]", "").split(",");
+						matrix.add(line);
+					}
+					
+					writeToFile(matrix, memFile, false);
+				}
+
+			}
+		}
 	}
 
 	private void writeToFile(String[] stringsToWrite, File fileToWrite, boolean append)
