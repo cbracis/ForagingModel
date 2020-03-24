@@ -88,9 +88,8 @@ public class SimulationFileWriter implements SimulationReporter
 //				Parameter.ShortLearningRate,
 //				Parameter.LongLearningRate,
 				Parameter.ShortSpatialScale,
-				Parameter.LongSpatialScale,
+				Parameter.LongSpatialScale
 //				Parameter.ShortMemoryFactor, actually still changing...
-				Parameter.StartPointsIndex
 				// predator
 //				Parameter.TotalPredationPressure,
 //				Parameter.PredatorDecayRate,

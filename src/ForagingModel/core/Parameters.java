@@ -65,7 +65,6 @@ public class Parameters
 							EmptyBorderSize,
 							StartPointsType,
 							StartPointsFileName,
-							StartPointsIndex,
 							RandomSeed,
 							CreateRandomSeed,
 							VisualizeSimulation, 
@@ -89,6 +88,7 @@ public class Parameters
 	private Map<Parameter, ParameterType> types;
 
 	private List<NdPoint> startPoints;
+	private int startPointIndex;
 	
 	private final String OUTPUT_DIR = "output";
 	private final String R_FILE = "Visualizer.R";
@@ -230,9 +230,6 @@ public class Parameters
 
 		values.put( Parameter.StartPointsFileName, "" );
 		types.put( Parameter.StartPointsFileName, ParameterType.String );
-		
-		values.put( Parameter.StartPointsIndex, null );
-		types.put( Parameter.StartPointsIndex, ParameterType.Integer );
 		
 		values.put(Parameter.RandomSeed, 999);
 		types.put(Parameter.RandomSeed, ParameterType.Integer);
@@ -627,11 +624,6 @@ public class Parameters
 		return results;
 	}
 	
-	public int getStartPointsIndex()
-	{
-		return (Integer) values.get(Parameter.StartPointsIndex);
-	}
-
 	public int getNumSteps()
 	{
 		return (Integer) values.get(Parameter.NumSteps);
@@ -797,26 +789,50 @@ public class Parameters
 				startX = (getMaxDimensionX() - getMinDimension()) / 2;
 				startY = (getMaxDimensionY() - getMinDimension()) / 2;
 			}			
-			startingLocation = new NdPoint(startX, startY);
-			
+			startingLocation = new NdPoint(startX, startY);			
 			break;
+			
 		case Random:
 			NumberGenerator generator = ModelEnvironment.getNumberGenerator();
 			startingLocation = new NdPoint(generator.nextDoubleFromTo(0, getLandscapeSizeX()), generator.nextDoubleFromTo(0, getLandscapeSizeY()));
 			break;
+			
 		case FromFile:
-			if (getStartPointsIndex() >= startPoints.size())
-			{
-				throw new ForagingModelException(String.format("Requested start point %d, but only %d start points read from file", getStartPointsIndex(), startPoints.size()));
-			}
-			startingLocation = startPoints.get(getStartPointsIndex());
-
+			startingLocation = getNextStartPointFromFile();
 			break;
+			
 		default:
 			throw new ForagingModelException("Unhandled StartPointsType " + getStartPointsType());
 		}
 	
 		return startingLocation;
+	}
+	
+	private NdPoint getNextStartPointFromFile()
+	{
+		if (null == startPoints)
+		{
+			throw new ForagingModelException("Requested start point from file but file not specified");
+		}
+		if (startPointIndex >= startPoints.size())
+		{
+			throw new ForagingModelException(String.format("Requested start point %d, but only %d start points read from file", startPointIndex, startPoints.size()));
+		}
+
+		NdPoint point = startPoints.get(startPointIndex);
+		startPointIndex++;
+		
+		if (startPointIndex >= startPoints.size())
+		{
+			// automatically wrap around and re-use start points
+			// in the case that there are the same number of start points as foragers, 
+			// the same start points will thereby be used for the next simulation
+			// in the case that the number of start points is the same as the number of simulations,
+			// (e.g. for one forager) this can be used to for the set of start points to use
+			startPointIndex = 0;
+		}
+		
+		return point;
 	}
 	
 	public String getRFilePath()
@@ -887,6 +903,7 @@ public class Parameters
 	{
 		StartPointReader spReader = InputFactory.createStartPointReader();
 		startPoints = spReader.readStartPointsFile(getStartPointsFile());
+		startPointIndex = 0;
 	}
 
 }

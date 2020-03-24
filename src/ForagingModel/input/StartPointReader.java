@@ -30,7 +30,7 @@ public class StartPointReader
 		try 
 		{
 			reader = new BufferedReader(new FileReader(input));
-			String line =  reader.readLine(); // skip first line
+			String line =  reader.readLine(); // skip first line for header
 			
 			while ( (line = reader.readLine()) != null )
 			{
