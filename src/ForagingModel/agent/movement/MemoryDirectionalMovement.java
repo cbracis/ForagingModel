@@ -42,9 +42,9 @@ public class MemoryDirectionalMovement implements MovementBehavior, MemoryMoveme
 	}
 	
 	@Override
-	public boolean encounteredPredator() 
+	public boolean escapedPredator() 
 	{
-		return underlyingMovement.encounteredPredator();
+		return underlyingMovement.escapedPredator();
 	}
 
 }

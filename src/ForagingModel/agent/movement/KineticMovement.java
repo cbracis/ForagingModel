@@ -1,13 +1,12 @@
 package ForagingModel.agent.movement;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import ForagingModel.agent.Recorder;
 import ForagingModel.core.NdPoint;
 import ForagingModel.core.Velocity;
+import ForagingModel.predator.PredatorEncounterBehavior;
 import ForagingModel.predator.PredatorManager;
-import ForagingModel.space.SpaceUtils;
 
 public class KineticMovement implements MovementBehavior
 {
@@ -18,13 +17,15 @@ public class KineticMovement implements MovementBehavior
 	private Recorder recorder;
 	private PredatorManager predators;
 	private double predatorEncounterRadius;
+	private PredatorEncounterBehavior predatorEncounterBehavior;
 	private BehaviorState previousState;
 	private Velocity previousVelocity;
-	private Set<NdPoint> previousPredators;
+	private boolean escapedPredator;
 
 	protected KineticMovement(MovementProcess searching, MovementProcess feeding, 
 			BehaviorSwitchingRule switchingRule, Recorder recorder,
-			PredatorManager predators, double predatorEncounterRadius) 
+			PredatorManager predators, double predatorEncounterRadius,
+			PredatorEncounterBehavior predatorEncounterBehavior) 
 	{
 		this.searching = searching;
 		this.feeding = feeding;
@@ -33,9 +34,10 @@ public class KineticMovement implements MovementBehavior
 		this.recorder = recorder;
 		this.predators = predators;
 		this.predatorEncounterRadius = predatorEncounterRadius;
+		this.predatorEncounterBehavior = predatorEncounterBehavior;
 		previousState = BehaviorState.Searching;
 		previousVelocity = null;
-		previousPredators = new HashSet<NdPoint>();
+		escapedPredator = false;
 	}
 
 	@Override
@@ -46,40 +48,18 @@ public class KineticMovement implements MovementBehavior
 		
 		// if encountered predator, switch to searching
 		Set<NdPoint> encounters = predators.getActivePredators(currentLocation, predatorEncounterRadius);
-//		Set<NdPoint> encountersIncPrevious = new HashSet<NdPoint>(encounters);
-	//	encountersIncPrevious.addAll(previousPredators);
 		
 		Velocity velocity;
-		if (encounters.size() > 0) // predators
+		if ( encounters.size() > 0 // predators
+			& predatorEncounterBehavior.equals(PredatorEncounterBehavior.Escape) )
 		{
 			state = BehaviorState.Escape;
+			escapedPredator = true;
 			
-			// take evasive action if encountered predators
+			// take evasive action 
 			velocity = searching.getEscapeVelocity(currentLocation, encounters);
-			
-			// disable reversing steps for now to simplify model
-			// if it needs to be added back, make sure to add to SingleState too
-
-//			// check if this velocity is still in the encounter radius for the predators
-//			boolean stillEncounteringPredators = isStillEncounteringPredators(velocity.move(currentLocation), encounters); // change here
-//
-//			// if so, back up instead, if this isn't first step
-//			if (stillEncounteringPredators && previousVelocity != null)
-//			{
-//				Velocity reverseVelocity = searching.getReverseVelocity(currentLocation, previousVelocity);
-//				
-//				// but check first that this isn't also still encountering predators, which could be the case if a 
-//				// predator just appeared and any more will still be inside encounter radius
-//				if (!isStillEncounteringPredators(reverseVelocity.move(currentLocation), encounters)) // change here
-//				{
-//					velocity = reverseVelocity;
-//				}
-//			}
-			
-			// now set previous predators for next time
-			previousPredators = encounters;
 		}
-		else // no predator encounters
+		else // no predator encounters or no escape behavior
 		{
 			switch (state)
 			{
@@ -93,8 +73,7 @@ public class KineticMovement implements MovementBehavior
 				throw new IllegalArgumentException("Unexpected behavior state: " + state);	
 			}
 			
-			// now set previous predators for next time
-			previousPredators = new HashSet<NdPoint>();
+			escapedPredator = false;
 		}
 		
 		// record 
@@ -115,24 +94,9 @@ public class KineticMovement implements MovementBehavior
 	}
 	
 	@Override
-	public boolean encounteredPredator() 
+	public boolean escapedPredator() 
 	{
-		// previousPredators is set to current encounter set at end of getNextVelocity()
-		return previousPredators.size() > 0;
-	}
-
-	private boolean isStillEncounteringPredators(NdPoint location, Set<NdPoint> encounters)
-	{
-		boolean stillEncounteringPredators = false;
-		
-		for (NdPoint predatorLoc : encounters)
-		{
-			if (SpaceUtils.getDistance(location, predatorLoc) < predatorEncounterRadius)
-			{
-				stillEncounteringPredators = true;
-			}
-		}
-		return stillEncounteringPredators;
+		return escapedPredator;
 	}
 
 }

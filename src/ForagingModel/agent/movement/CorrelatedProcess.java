@@ -12,7 +12,6 @@ public class CorrelatedProcess extends AbstractMovementProcess implements Moveme
 {
 	protected NumberGenerator generator = ModelEnvironment.getNumberGenerator();
 
-	protected double speed;
 	protected double persistence;
 	protected Angle angle;
 	
@@ -48,24 +47,9 @@ public class CorrelatedProcess extends AbstractMovementProcess implements Moveme
 	
 	@Override
 	public Velocity getEscapeVelocity(NdPoint currentLocation,	Set<NdPoint> predators) 
-	{
-		Angle escapeAngle = getAngleAway(currentLocation, predators);
-		
-		Bounds outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
-		if (outsideBounds != Bounds.None)
-		{
-			escapeAngle = getAngleAway(currentLocation, predators, outsideBounds);
-			outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
-			
-			if (outsideBounds != Bounds.None)
-			{
-				escapeAngle = getClosestAngle(escapeAngle, outsideBounds);
-			}
-		}
-		
-		angle = escapeAngle;
-		Velocity velocity = Velocity.createPolar(speed, escapeAngle);
-		velocity = velocity.scaleBy(dt);
+	{		
+		Velocity velocity = super.getEscapeVelocity(currentLocation, predators);
+		angle = new Angle(velocity.arg());
 		return velocity;
 	}
 	

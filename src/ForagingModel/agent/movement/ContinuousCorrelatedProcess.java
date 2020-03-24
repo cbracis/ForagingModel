@@ -13,8 +13,6 @@ public class ContinuousCorrelatedProcess extends AbstractMovementProcess impleme
 {
 	protected double tau;
 	protected Velocity mu;
-	protected double speed;
-	protected Velocity currentVelocity;
 	protected DirectionUpdater directionUpdater;
 	private NumberGenerator generator;
 	private Recorder recorder;
@@ -83,25 +81,8 @@ public class ContinuousCorrelatedProcess extends AbstractMovementProcess impleme
 	@Override
 	public Velocity getEscapeVelocity(NdPoint currentLocation, Set<NdPoint> predators) 
 	{
-		Angle escapeAngle = getAngleAway(currentLocation, predators);
-		
-		Bounds outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
-		if (outsideBounds != Bounds.None)
-		{
-			escapeAngle = getAngleAway(currentLocation, predators, outsideBounds);
-			outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
-			
-			if (outsideBounds != Bounds.None)
-			{
-				escapeAngle = getClosestAngle(escapeAngle, outsideBounds);
-			}
-		}
-		
-		// straight away from predator 
-		Velocity newVelocity = Velocity.createPolar(speed, escapeAngle);
-		currentVelocity = newVelocity;
+		Velocity newVelocity = super.getEscapeVelocity(currentLocation, predators);
 		recorder.recordMu(mu);
-		newVelocity = newVelocity.scaleBy(dt);
 		return newVelocity;
 	}
 

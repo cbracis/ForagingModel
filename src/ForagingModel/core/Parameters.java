@@ -16,6 +16,7 @@ import ForagingModel.agent.movement.MovementType;
 import ForagingModel.input.InputFactory;
 import ForagingModel.input.StartPointReader;
 import ForagingModel.output.RVisualizer;
+import ForagingModel.predator.PredatorEncounterBehavior;
 
 public class Parameters
 {
@@ -77,9 +78,10 @@ public class Parameters
 							PredatorDecayRate,
 							PredatorMemoryFactor,
 							PredatorIntroduction, // for now hard code when on, eventually will need more parameters?
+							PredatorEncounterBehavior,
 							FoodSafetyTradeoff}
 	
-	public enum ParameterType { Integer, Long, Boolean, Double, UnitInterval, String, MovementProcess, MovementType, DirectionUpdaterType, StartPointsType };
+	public enum ParameterType { Integer, Long, Boolean, Double, UnitInterval, String, MovementProcess, MovementType, DirectionUpdaterType, StartPointsType, PredatorEncounterBehavior };
 	
 	private static Parameters parameters;
 	
@@ -268,6 +270,9 @@ public class Parameters
 		values.put( Parameter.PredatorIntroduction, false );
 		types.put( Parameter.PredatorIntroduction, ParameterType.Boolean );
 
+		values.put( Parameter.PredatorEncounterBehavior, PredatorEncounterBehavior.Escape );
+		types.put( Parameter.PredatorEncounterBehavior, ParameterType.PredatorEncounterBehavior );
+
 		values.put( Parameter.FoodSafetyTradeoff, 0.0 );
 		types.put( Parameter.FoodSafetyTradeoff, ParameterType.Double );
 
@@ -344,6 +349,9 @@ public class Parameters
 			break;
 		case StartPointsType:
 			parsedValue = StartPointsType.valueOf( value );
+			break;
+		case PredatorEncounterBehavior:
+			parsedValue = PredatorEncounterBehavior.valueOf( value );
 			break;
 		default:
 			throw new ForagingModelException( "Parameter not found: " + parameter );
@@ -697,6 +705,11 @@ public class Parameters
 	public boolean getPredatorIntroduction() 
 	{
 		return (Boolean) values.get(Parameter.PredatorIntroduction);
+	}
+	
+	public PredatorEncounterBehavior getPredatorEncounterBehavior() 
+	{
+		return (PredatorEncounterBehavior) values.get(Parameter.PredatorEncounterBehavior);
 	}
 
 	public double getFoodSafetyTradeoff() 

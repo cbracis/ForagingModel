@@ -5,6 +5,7 @@ import java.util.Set;
 import ForagingModel.core.NdPoint;
 import ForagingModel.agent.Recorder;
 import ForagingModel.core.Velocity;
+import ForagingModel.predator.PredatorEncounterBehavior;
 import ForagingModel.predator.PredatorManager;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.MemoryAssemblage;
@@ -20,12 +21,13 @@ public class MemoryDestinationMovement implements MovementBehavior, MemoryMoveme
 	private LocationManager locationManager;
 	private PredatorManager predators;
 	private double predatorEncounterRadius;
-	private boolean encounteredPredator;
+	private PredatorEncounterBehavior predatorEncounterBehavior;
+	private boolean escapedPredator;
 	
 	protected MemoryDestinationMovement(DestinationProcess searching, MovementProcess feeding, 
 			BehaviorSwitchingRule switchingRule, Recorder recorder,
 			MemoryAssemblage memory, LocationManager locationManger, PredatorManager predators, 
-			NdPoint startingLocation, double predatorEncounterRadius) 
+			NdPoint startingLocation, double predatorEncounterRadius, PredatorEncounterBehavior predatorEncounterBehavior) 
 	{
 		this.searching = searching;
 		this.feeding = feeding;
@@ -35,9 +37,10 @@ public class MemoryDestinationMovement implements MovementBehavior, MemoryMoveme
 		this.locationManager = locationManger;
 		this.predators = predators;
 		this.predatorEncounterRadius = predatorEncounterRadius;
+		this.predatorEncounterBehavior = predatorEncounterBehavior;
 		
 		this.previousState = BehaviorState.Searching;
-		this.encounteredPredator = false;
+		this.escapedPredator = false;
 		updateDestination(startingLocation);
 	}
 
@@ -59,21 +62,17 @@ public class MemoryDestinationMovement implements MovementBehavior, MemoryMoveme
 			updateDestination(currentLocation);
 		}
 		
-		// if encountered predator, update state & destination for next step
-		encounteredPredator = false;
-		Set<NdPoint> encounters = predators.getActivePredators(currentLocation, predatorEncounterRadius);
-		if (encounters.size() > 0)
-		{
-			state = BehaviorState.Escape;
-			updateDestination(currentLocation);
-			encounteredPredator = true;
-		}
-
-		
-		// take evasive action if encountered predators
+		escapedPredator = false;
 		Velocity velocity;
-		if (encounters.size() > 0)
+		Set<NdPoint> encounters = predators.getActivePredators(currentLocation, predatorEncounterRadius);
+		
+		// if encountered predator, update state & destination for next step
+		if (encounters.size() > 0 & predatorEncounterBehavior.equals(PredatorEncounterBehavior.Escape) )
 		{
+			// take evasive action if encountered predators
+			updateDestination(currentLocation);
+			state = BehaviorState.Escape;
+			escapedPredator = true;
 			velocity = searching.getEscapeVelocity(currentLocation, encounters);
 		}
 		else
@@ -127,10 +126,9 @@ public class MemoryDestinationMovement implements MovementBehavior, MemoryMoveme
 	}
 	
 	@Override
-	public boolean encounteredPredator() 
+	public boolean escapedPredator() 
 	{
-		// previousPredators is set to current encounter set at end of getNextVelocity()
-		return encounteredPredator;
+		return escapedPredator;
 	}
 
 

@@ -1,10 +1,8 @@
 package ForagingModel.agent.movement;
 
-import java.util.Set;
-
 import ForagingModel.core.Angle;
-import ForagingModel.core.NdPoint;
 import ForagingModel.core.ModelEnvironment;
+import ForagingModel.core.NdPoint;
 import ForagingModel.core.NumberGenerator;
 import ForagingModel.core.Velocity;
 
@@ -13,8 +11,6 @@ public class OUProcess extends AbstractMovementProcess implements MovementProces
 	protected double tau;
 	protected double beta;
 	protected Velocity mu;
-	protected double speed;
-	private Velocity currentVelocity;
 	private NumberGenerator generator;
 	
 	protected OUProcess(double speed, double tau, Velocity initialVelocity, 
@@ -53,31 +49,7 @@ public class OUProcess extends AbstractMovementProcess implements MovementProces
 		newVelocity = newVelocity.scaleBy(dt);
 		return newVelocity;
 	}
-	
-	@Override
-	public Velocity getEscapeVelocity(NdPoint currentLocation,	Set<NdPoint> predators) 
-	{
-		Angle escapeAngle = getAngleAway(currentLocation, predators);
 		
-		Bounds outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
-		if (outsideBounds != Bounds.None)
-		{
-			escapeAngle = getAngleAway(currentLocation, predators, outsideBounds);
-			outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
-			
-			if (outsideBounds != Bounds.None)
-			{
-				escapeAngle = getClosestAngle(escapeAngle, outsideBounds);
-			}
-		}
-		
-		// straight away from predator 
-		Velocity newVelocity = Velocity.createPolar(speed, escapeAngle);
-		currentVelocity = newVelocity;
-		newVelocity = newVelocity.scaleBy(dt);
-		return newVelocity;
-	}
-	
 	@Override
 	public Velocity getReverseVelocity(NdPoint currentLocation, Velocity previousVelocity)
 	{

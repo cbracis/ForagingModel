@@ -22,6 +22,8 @@ public abstract class AbstractMovementProcess
 	private double maxDimensionX;
 	private double maxDimensionY;
 	
+	protected double speed;
+	protected Velocity currentVelocity;
 	protected double dt; // time step
 	protected double cornerFactor;
 
@@ -35,6 +37,29 @@ public abstract class AbstractMovementProcess
 		this.maxDimensionY = maxDimensionY;
 		this.dt = intervalSize;
 		cornerFactor = 2;
+	}
+	
+	public Velocity getEscapeVelocity(NdPoint currentLocation,	Set<NdPoint> predators) 
+	{
+		Angle escapeAngle = getAngleAway(currentLocation, predators);
+		
+		Bounds outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
+		if (outsideBounds != Bounds.None)
+		{
+			escapeAngle = getAngleAway(currentLocation, predators, outsideBounds);
+			outsideBounds = checkBounds(currentLocation, Velocity.createPolar(speed, escapeAngle));
+			
+			if (outsideBounds != Bounds.None)
+			{
+				escapeAngle = getClosestAngle(escapeAngle, outsideBounds);
+			}
+		}
+		
+		// straight away from predator 
+		Velocity newVelocity = Velocity.createPolar(speed, escapeAngle);
+		currentVelocity = newVelocity;
+		newVelocity = newVelocity.scaleBy(dt);
+		return newVelocity;
 	}
 	
 	protected Bounds checkBounds(NdPoint currentLocation, Velocity unscaledVelocity)

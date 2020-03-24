@@ -9,5 +9,5 @@ public interface MovementBehavior
 
 	BehaviorState getState();
 	
-	boolean encounteredPredator();
+	boolean escapedPredator();
 }

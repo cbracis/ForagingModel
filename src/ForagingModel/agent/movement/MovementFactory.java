@@ -5,6 +5,7 @@ import ForagingModel.core.ModelEnvironment;
 import ForagingModel.core.NdPoint;
 import ForagingModel.core.Parameters;
 import ForagingModel.core.Velocity;
+import ForagingModel.predator.PredatorEncounterBehavior;
 import ForagingModel.predator.PredatorManager;
 import ForagingModel.schedule.Scheduler;
 import ForagingModel.space.AggregateMemory;
@@ -101,7 +102,8 @@ public class MovementFactory
 			default:
 				throw new IllegalArgumentException("Unrecognized movement process " + params.getMovementProcess());
 			}
-			movement = createKineticMovement(searching, feeding, switchingRule, recorder, predatorManager, params.getPredatorEncounterRadius());
+			movement = createKineticMovement(searching, feeding, switchingRule, recorder, predatorManager, 
+					params.getPredatorEncounterRadius(), params.getPredatorEncounterBehavior());
 			break;
 			
 		case SingleState:
@@ -157,7 +159,8 @@ public class MovementFactory
 	protected static MovementBehavior createSingleStateMovement(MovementProcess movement, Recorder recorder,
 			PredatorManager predators)
 	{
-		return new SingleStateMovement(movement, recorder, predators, Parameters.get().getPredatorEncounterRadius());
+		return new SingleStateMovement(movement, recorder, predators, 
+				Parameters.get().getPredatorEncounterRadius(), Parameters.get().getPredatorEncounterBehavior());
 	}
 	
 	protected static MovementBehavior createStraightMemoryDestinationMovement(MemoryAssemblage memory, double averageConsumtion, 
@@ -247,9 +250,10 @@ public class MovementFactory
 
 	protected static MovementBehavior createKineticMovement(MovementProcess searching, MovementProcess feeding, 
 			BehaviorSwitchingRule switchingRule, Recorder recorder,
-			PredatorManager predators, double predatorEncounterRadius)
+			PredatorManager predators, double predatorEncounterRadius, PredatorEncounterBehavior predatorEncounterBehavior)
 	{
-		return new KineticMovement(searching, feeding, switchingRule, recorder, predators, predatorEncounterRadius);
+		return new KineticMovement(searching, feeding, switchingRule, recorder, 
+				predators, predatorEncounterRadius, predatorEncounterBehavior);
 	}
 	
 	protected static MovementBehavior createMemoryMovement(DestinationProcess searching, MovementProcess feeding, 
@@ -257,7 +261,8 @@ public class MovementFactory
 			LocationManager locationManager, PredatorManager predatorManager, NdPoint startingLocation)
 	{
 		return new MemoryDestinationMovement(searching, feeding, switchingRule, recorder, memory, 
-				locationManager, predatorManager, startingLocation, 0);
+				locationManager, predatorManager, startingLocation, 
+				Parameters.get().getPredatorEncounterRadius(), Parameters.get().getPredatorEncounterBehavior());
 	}
 	
 	protected static BehaviorSwitchingRule createBehaviorSwitchingRule(double landscapeAverageConsumtionRate)
@@ -388,7 +393,7 @@ public class MovementFactory
 		}
 		BehaviorSwitchingRule switchingRule = createBehaviorSwitchingRule(averageConsumtion);
 		MovementBehavior underlyingMovement = createKineticMovement(searchingBehavior, feedingBehavior, switchingRule, recorder,
-				predatorManager, params.getPredatorEncounterRadius());
+				predatorManager, params.getPredatorEncounterRadius(), params.getPredatorEncounterBehavior());
 		return new MemoryDirectionalMovement(underlyingMovement, memorySearch);
 	}
 	
@@ -411,7 +416,7 @@ public class MovementFactory
 		}
 		BehaviorSwitchingRule switchingRule = createBehaviorSwitchingRule(averageConsumtion);
 		MovementBehavior underlyingMovement = createKineticMovement(searchingBehavior, feedingBehavior, switchingRule, recorder,
-				predatorManager, params.getPredatorEncounterRadius());
+				predatorManager, params.getPredatorEncounterRadius(), params.getPredatorEncounterBehavior());
 		return new MemoryDirectionalMovement(underlyingMovement, memorySearch);
 	}
 
@@ -438,7 +443,7 @@ public class MovementFactory
 
 		BehaviorSwitchingRule switchingRule = createBehaviorSwitchingRule(averageConsumtion);
 		MovementBehavior underlyingMovement = createKineticMovement(searchingBehavior, feedingBehavior, switchingRule, recorder,
-				predatorManager, params.getPredatorEncounterRadius());
+				predatorManager, params.getPredatorEncounterRadius(), params.getPredatorEncounterBehavior());
 		return new MemoryDirectionalMovement(underlyingMovement, memorySearch);
 	}
 	

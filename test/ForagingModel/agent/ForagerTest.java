@@ -34,7 +34,7 @@ public class ForagerTest
 	{
 		LocationManager locationManager = SpaceFactory.createLocationManager(10);
 		MovementBehavior movement = Mockito.mock(MovementBehavior.class);
-		Mockito.when(movement.encounteredPredator()).thenReturn(false);
+		Mockito.when(movement.escapedPredator()).thenReturn(false);
 		Forager forager = AgentFactory.createForager(locationManager, resource, movement, 
 				AgentFactory.createRecorder(10, 0, 10, 1, null), 1, 2, 1);
 		double amtConsumed = 1.2;

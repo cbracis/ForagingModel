@@ -57,7 +57,7 @@ public class Forager extends Agent implements MovingAgent
 	
 	public void consumeResource()
 	{
-		if (movementBehavior.encounteredPredator())
+		if (movementBehavior.escapedPredator())
 		{
 			currentConsumption = 0;
 		}
