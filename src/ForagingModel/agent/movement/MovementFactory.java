@@ -12,11 +12,13 @@ import ForagingModel.space.AggregateMemory;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.MemoryAssemblage;
 import ForagingModel.space.ResourceAssemblage;
+import ForagingModel.space.ScentManager;
 import ForagingModel.space.SpaceFactory;
 
 public class MovementFactory 
 {
-	public static MovementBehavior createMovement(ResourceAssemblage resources, PredatorManager predatorManager, 
+	public static MovementBehavior createMovement(ResourceAssemblage resources, 
+			PredatorManager predatorManager, ScentManager scentManager,
 			double averageConsumption, LocationManager locationManager, NdPoint startingLocation, 
 			Scheduler scheduler, Recorder recorder)
 	{
@@ -28,7 +30,8 @@ public class MovementFactory
 		switch(params.getMovementType())
 		{
 		case MemoryDestination:
-			memory = SpaceFactory.createMemoryAssemblage(resources, predatorManager, scheduler);
+			memory = SpaceFactory.createMemoryAssemblage(resources, 
+					predatorManager, scentManager, scheduler);
 			
 			switch(params.getMovementProcess())
 			{
@@ -46,7 +49,8 @@ public class MovementFactory
 			}
 			break;
 		case MemoryDirectional:
-			memory = SpaceFactory.createMemoryAssemblage(resources, predatorManager, scheduler);
+			memory = SpaceFactory.createMemoryAssemblage(resources, 
+					predatorManager, scentManager, scheduler);
 			
 			MemoryAssemblage predatorMemory = null;
 			if (memory instanceof AggregateMemory)

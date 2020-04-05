@@ -1,5 +1,6 @@
 package ForagingModel.agent.movement;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import ForagingModel.agent.Recorder;
@@ -15,6 +16,7 @@ public class KineticMovement implements MovementBehavior
 	private BehaviorSwitchingRule switchingRule;
 	private BehaviorState state;
 	private Recorder recorder;
+	private boolean predationEnabled;
 	private PredatorManager predators;
 	private double predatorEncounterRadius;
 	private PredatorEncounterBehavior predatorEncounterBehavior;
@@ -35,6 +37,8 @@ public class KineticMovement implements MovementBehavior
 		this.predators = predators;
 		this.predatorEncounterRadius = predatorEncounterRadius;
 		this.predatorEncounterBehavior = predatorEncounterBehavior;
+		
+		predationEnabled = (predators == null) ? false : true;
 		previousState = BehaviorState.Searching;
 		previousVelocity = null;
 		escapedPredator = false;
@@ -47,7 +51,9 @@ public class KineticMovement implements MovementBehavior
 		boolean stateChanged = !(state == previousState);
 		
 		// if encountered predator, switch to searching
-		Set<NdPoint> encounters = predators.getActivePredators(currentLocation, predatorEncounterRadius);
+		Set<NdPoint> encounters = predationEnabled ?
+				predators.getActivePredators(currentLocation, predatorEncounterRadius) 
+				: new HashSet<NdPoint>(); // empty set
 		
 		Velocity velocity;
 		if ( encounters.size() > 0 // predators

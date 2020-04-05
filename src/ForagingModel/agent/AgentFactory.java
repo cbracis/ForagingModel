@@ -13,12 +13,14 @@ import ForagingModel.schedule.SchedulePriority;
 import ForagingModel.schedule.Scheduler;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.ResourceAssemblage;
+import ForagingModel.space.ScentManager;
 
 public class AgentFactory 
 {
 
 	public static Forager createAndPlaceForager(LocationManager space, ResourceAssemblage resource, 
-			PredatorManager predatorManager, NdPoint startingLocation, Scheduler scheduler)
+			PredatorManager predatorManager, ScentManager scentManager, 
+			NdPoint startingLocation, Scheduler scheduler)
 	{
 		Parameters params = Parameters.get();
 		double consumptionRate = params.getConsumptionRate();
@@ -31,11 +33,17 @@ public class AgentFactory
 		Recorder recorder = AgentFactory.createRecorder(numIntervals, numBurnInIntervals, resource.getNumPercentileBins(), 
 										 intervalSize, predatorManager); // need 1 per forager
 		Forager forager = createForager(space, resource, 
-				MovementFactory.createMovement(resource, predatorManager, averageConsumption, space, startingLocation, 
+				MovementFactory.createMovement(resource, predatorManager, scentManager,
+						averageConsumption, space, startingLocation, 
 						scheduler, recorder), 
 				recorder, 
 				averageConsumption, consumptionRate, consumptionSpatialScale);
+		
 		space.moveTo(forager, startingLocation);
+		if (null != scentManager)
+		{
+			scentManager.add(forager);
+		}
 		scheduler.register(forager, SchedulePriority.ForagerMove); 
 		scheduler.register(forager, SchedulePriority.ForagerConsume); 
 		
@@ -43,14 +51,15 @@ public class AgentFactory
 	}
 	
 	public static List<Forager> createAndPlaceForagers(int numForagers, LocationManager space, ResourceAssemblage resource, 
-			PredatorManager predatorManager, Scheduler scheduler)
+			PredatorManager predatorManager, ScentManager scentManager, Scheduler scheduler)
 	{
 		List<Forager> foragers = new ArrayList<Forager>(numForagers);
 		
 		for (int i = 0; i < numForagers; i++)
 		{
 			NdPoint startingLocation = Parameters.get().getStartingLocation();
-			foragers.add(createAndPlaceForager(space, resource, predatorManager, startingLocation, scheduler));
+			foragers.add(createAndPlaceForager(space, resource, predatorManager, scentManager,
+					startingLocation, scheduler));
 		}
 		return foragers;
 	}

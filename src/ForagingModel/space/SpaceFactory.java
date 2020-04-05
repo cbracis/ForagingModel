@@ -8,6 +8,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import ForagingModel.core.ForagingModelException;
 import ForagingModel.core.GridPoint;
 import ForagingModel.core.MatrixUtils;
 import ForagingModel.core.ModelEnvironment;
@@ -35,6 +36,11 @@ public class SpaceFactory
 	public static LocationManager createLocationManager(int landscapeSize)
 	{
 		return new LocationMangerImpl(0, 0, landscapeSize, landscapeSize);
+	}
+	
+	public static ScentManager createScentManager(LocationManager locationManager)
+	{
+		return new ScentManager(locationManager);
 	}
 
 	public static ResourceAssemblage generateResource(List<CellData> resourceData, Scheduler scheduler) 
@@ -157,19 +163,32 @@ public class SpaceFactory
 		return value;
 	}
 
-	public static MemoryAssemblage createMemoryAssemblage(ResourceAssemblage resources, PredatorManager predatorManager, Scheduler scheduler)
+	public static MemoryAssemblage createMemoryAssemblage(ResourceAssemblage resources, 
+			PredatorManager predatorManager, ScentManager scentManager, 
+			Scheduler scheduler)
 	{
 		// note that this might eventually get more complicated with different decision rules
 		// for now, no predators ==> create resource memory
 		// and predators ==> create aggregate memory for predators and resource
+		// but no predators & scents ==> create scent aggregate memory for scent and resource
 		
 		MemoryAssemblage memory;
 		ResourceMemory resourceMemory = createResourceMemory(resources);
 		
-		if (Parameters.get().getPredation() && null != predatorManager)
+		if (Parameters.get().getPredation() && null != predatorManager && null == scentManager)
 		{
 			PredatorMemory predatorMemory = createPredatorMemory(predatorManager);
 			memory = createAggregateMemory(resourceMemory, predatorMemory);
+		}
+		else if (null != scentManager && null == predatorManager && !Parameters.get().getPredation())
+		{
+			ScentHistory scentHistory = createScentHistory();
+			scentManager.add(scentHistory);
+			memory = createScentAggregateMemory(resourceMemory, scentHistory);
+		}
+		else if (null != scentManager && null != predatorManager)
+		{
+			throw new ForagingModelException("Scent and predators together not currently supported.");
 		}
 		else
 		{
@@ -233,6 +252,27 @@ public class SpaceFactory
 				encounterRadius, memorySpatialScale, intervalSize);
 	}
 	
+	protected static ScentHistory createScentHistory()
+	{
+		Parameters params = Parameters.get();
+		RealMatrix scentMatrix = new Array2DRowRealMatrix(params.getLandscapeSizeX(), params.getLandscapeSizeY());
+		ScentHistory scentHistory = createScentHistory(scentMatrix, 
+				AngularProbabilityInfo.create(), params.getScentDepositionRate(), params.getScentDepositionSpatialScale(),
+				params.getScentDecayRate(), params.getScentResponseSpatialScale(), 
+				params.getScentResponseFactor(), params.getIntervalSize());
+		return scentHistory;
+	}
+	
+	protected static ScentHistory createScentHistory(RealMatrix scentMatrix, 
+			AngularProbabilityInfo angularProbabilityInfo,
+			double depositionRate, double depositionSpatialScale, double decayRate, 
+			double scentSpatialScal, double scentResponseFactor,
+            double intervalSize)
+	{
+		return new ScentHistory(scentMatrix, angularProbabilityInfo, depositionRate, depositionSpatialScale, 
+				decayRate, scentSpatialScal, scentResponseFactor, intervalSize);
+	}
+	
 	protected static AggregateMemory createAggregateMemory(ResourceMemory resourceMemory, PredatorMemory predatorMemory)
 	{
 		return createAggregateMemory(resourceMemory, predatorMemory, Parameters.get().getFoodSafetyTradeoff());
@@ -243,5 +283,9 @@ public class SpaceFactory
 		return new AggregateMemory(resourceMemory, predatorMemory, foodSafetyTradeoff);
 	}
 
+	protected static ScentAggregateMemory createScentAggregateMemory(ResourceMemory resourceMemory, ScentHistory scentHistory)
+	{
+		return new ScentAggregateMemory(resourceMemory, scentHistory);
+	}
 
 }

@@ -107,7 +107,8 @@ public class SpaceFactoryTest
 		SchedulerImpl scheduler = Mockito.mock(SchedulerImpl.class);
 		Recorder recorder = Mockito.mock(Recorder.class);
 		
-		MovementBehavior movement = MovementFactory.createMovement(resources, predatorManager, 1.0, locationManager, 
+		MovementBehavior movement = MovementFactory.createMovement(resources, 
+				predatorManager, null, 1.0, locationManager, 
 				new NdPoint(5, 5), scheduler, recorder);
 	
 		Assert.assertTrue(movement instanceof MemoryMovementBehavior, "memory");

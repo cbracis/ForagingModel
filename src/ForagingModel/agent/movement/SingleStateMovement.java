@@ -1,5 +1,6 @@
 package ForagingModel.agent.movement;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import ForagingModel.agent.Recorder;
@@ -12,6 +13,7 @@ public class SingleStateMovement implements MovementBehavior
 {
 	private MovementProcess movement;
 	private Recorder recorder;
+	private boolean predationEnabled;
 	private PredatorManager predators;
 	private double predatorEncounterRadius;
 	private PredatorEncounterBehavior predatorEncounterBehavior;
@@ -27,13 +29,17 @@ public class SingleStateMovement implements MovementBehavior
 		this.predators = predators;
 		this.predatorEncounterRadius = predatorEncounterRadius;
 		this.predatorEncounterBehavior = predatorEncounterBehavior;
+		
+		predationEnabled = (predators == null) ? false : true;
 		escapedPredator = false;
 	}
 	
 	@Override
 	public Velocity getNextVelocity(NdPoint currentLocation, double currentConsumptionRate) 
 	{
-		Set<NdPoint> encounters = predators.getActivePredators(currentLocation, predatorEncounterRadius);
+		Set<NdPoint> encounters = predationEnabled ?
+				predators.getActivePredators(currentLocation, predatorEncounterRadius) 
+				: new HashSet<NdPoint>(); // empty set
 
 		Velocity velocity;
 

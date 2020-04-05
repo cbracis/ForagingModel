@@ -29,7 +29,7 @@ public class DirectionProbabalisticTest
 	{
 		Scheduler scheduler = Mockito.mock(Scheduler.class);
 		ResourceAssemblage resources = SpaceFactory.generateTwoPatchResource(50, 50, scheduler);
-		MemoryAssemblage foragingMem = SpaceFactory.createMemoryAssemblage(resources, null, scheduler);
+		MemoryAssemblage foragingMem = SpaceFactory.createMemoryAssemblage(resources, null, null, scheduler);
 		
 		DirectionProbabalistic direction = foragingMem.getDirectionProbabalistic(new NdPoint(25, 25));
 		
@@ -57,7 +57,7 @@ public class DirectionProbabalisticTest
 		TestUtilities.setParameter(Parameter.PredatorLearningRate, "50");
 		TestUtilities.setParameter(Parameter.PredatorMemoryFactor, "50");
 		TestUtilities.setParameter(Parameter.MemorySpatialScalePredation, "10");
-		MemoryAssemblage aggregateMem = SpaceFactory.createMemoryAssemblage(resources, predators, scheduler);
+		MemoryAssemblage aggregateMem = SpaceFactory.createMemoryAssemblage(resources, predators, null, scheduler);
 		
 		aggregateMem.learn(learnLoc);
 		DirectionProbabalistic direction = aggregateMem.getDirectionProbabalistic(foragerLoc);

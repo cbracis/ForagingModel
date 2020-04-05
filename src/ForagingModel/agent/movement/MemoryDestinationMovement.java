@@ -1,5 +1,6 @@
 package ForagingModel.agent.movement;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import ForagingModel.core.NdPoint;
@@ -19,6 +20,7 @@ public class MemoryDestinationMovement implements MovementBehavior, MemoryMoveme
 	private BehaviorState previousState;
 	private MemoryAssemblage memory;
 	private LocationManager locationManager;
+	private boolean predationEnabled;
 	private PredatorManager predators;
 	private double predatorEncounterRadius;
 	private PredatorEncounterBehavior predatorEncounterBehavior;
@@ -39,6 +41,7 @@ public class MemoryDestinationMovement implements MovementBehavior, MemoryMoveme
 		this.predatorEncounterRadius = predatorEncounterRadius;
 		this.predatorEncounterBehavior = predatorEncounterBehavior;
 		
+		predationEnabled = (predators == null) ? false : true;
 		this.previousState = BehaviorState.Searching;
 		this.escapedPredator = false;
 		updateDestination(startingLocation);
@@ -64,7 +67,9 @@ public class MemoryDestinationMovement implements MovementBehavior, MemoryMoveme
 		
 		escapedPredator = false;
 		Velocity velocity;
-		Set<NdPoint> encounters = predators.getActivePredators(currentLocation, predatorEncounterRadius);
+		Set<NdPoint> encounters = predationEnabled ?
+				predators.getActivePredators(currentLocation, predatorEncounterRadius) 
+				: new HashSet<NdPoint>(); // empty set
 		
 		// if encountered predator, update state & destination for next step
 		if (encounters.size() > 0 & predatorEncounterBehavior.equals(PredatorEncounterBehavior.Escape) )

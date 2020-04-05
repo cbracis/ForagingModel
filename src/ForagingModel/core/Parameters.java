@@ -78,7 +78,13 @@ public class Parameters
 							PredatorMemoryFactor,
 							PredatorIntroduction, // for now hard code when on, eventually will need more parameters?
 							PredatorEncounterBehavior,
-							FoodSafetyTradeoff}
+							FoodSafetyTradeoff,
+							ScentTracking,
+							ScentDepositionRate,
+							ScentDepositionSpatialScale,
+							ScentDecayRate,
+							ScentResponseSpatialScale,
+							ScentResponseFactor}
 	
 	public enum ParameterType { Integer, Long, Boolean, Double, UnitInterval, String, MovementProcess, MovementType, DirectionUpdaterType, StartPointsType, PredatorEncounterBehavior };
 	
@@ -272,6 +278,24 @@ public class Parameters
 
 		values.put( Parameter.FoodSafetyTradeoff, 0.0 );
 		types.put( Parameter.FoodSafetyTradeoff, ParameterType.Double );
+		
+		values.put( Parameter.ScentTracking, false );
+		types.put( Parameter.ScentTracking, ParameterType.Boolean );
+
+		values.put( Parameter.ScentDepositionRate, 10.0 );
+		types.put( Parameter.ScentDepositionRate, ParameterType.Double );
+
+		values.put( Parameter.ScentDepositionSpatialScale, 10.0 );
+		types.put( Parameter.ScentDepositionSpatialScale, ParameterType.Double );
+
+		values.put( Parameter.ScentDecayRate, 0.01 );
+		types.put( Parameter.ScentDecayRate, ParameterType.UnitInterval );
+
+		values.put( Parameter.ScentResponseSpatialScale, 5.0 );
+		types.put( Parameter.ScentResponseSpatialScale, ParameterType.Double );
+
+		values.put( Parameter.ScentResponseFactor, 1.0 );
+		types.put( Parameter.ScentResponseFactor, ParameterType.Double );
 
 	}
 	
@@ -708,6 +732,36 @@ public class Parameters
 	{
 		return (Double) values.get(Parameter.FoodSafetyTradeoff);
 	}
+	
+	public boolean getScentTracking() 
+	{
+		return (Boolean) values.get(Parameter.ScentTracking);
+	}
+
+	public double getScentDepositionRate() 
+	{
+		return (Double) values.get(Parameter.ScentDepositionRate);
+	}
+
+	public double getScentDepositionSpatialScale() 
+	{
+		return (Double) values.get(Parameter.ScentDepositionSpatialScale);
+	}
+
+	public double getScentDecayRate() 
+	{
+		return (Double) values.get(Parameter.ScentDecayRate);
+	}
+
+	public double getScentResponseSpatialScale() 
+	{
+		return (Double) values.get(Parameter.ScentResponseSpatialScale);
+	}
+
+	public double getScentResponseFactor() 
+	{
+		return (Double) values.get(Parameter.ScentResponseFactor);
+	}
 
 	// non-specified parameters
 	// --------------------------------------------------------------------------
@@ -894,6 +948,10 @@ public class Parameters
 		// short decay must be strictly less than long decay unless both are 1 (no memory)
 		if ( (getShortDecayRate() < getLongDecayRate()) ||
 			 (getShortDecayRate() == getLongDecayRate() && getShortDecayRate() != 1.0)) 
+		{ valid = false; }
+		
+		// predators and scent not currently both supported
+		if (getPredation() && getScentTracking())
 		{ valid = false; }
 
 		return valid;

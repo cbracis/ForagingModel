@@ -5,8 +5,9 @@ public enum SchedulePriority
 	First(Integer.MIN_VALUE),
 	ForagerMove(1),
 	ForagerConsume(2),
-	ResourceGrow(3),
-	MemoryDecay(4),
+	ForagerDepositScent(3),
+	ResourceGrow(4),
+	MemoryDecay(5),
 	Visualize(10),
 	Last(Integer.MAX_VALUE);
 	
