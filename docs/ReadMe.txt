@@ -61,3 +61,14 @@ on macOS, may need to run the following:
 - sudo R CMD javareconf (after java install, see https://github.com/rstudio/rstudio/issues/2254)
 - system.file("jri",package="rJava") (to get location of jri to add as VM argument)
 
+* To build the jar for distribution *
+
+This project uses gradle. A gradle wrapper has been included, so all gradle commands should be issued as 'gradlew'.
+
+gradlew build - Builds and runs all tests
+
+gradlew assemble - Builds but does not test
+
+gradlew clean - Removes all build artifacts
+
+Note: Jars to distribute are in the build/libs directory. The 'full' jar includes all dependent libraries.

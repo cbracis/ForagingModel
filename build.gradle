@@ -1,0 +1,83 @@
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
+}
+
+version '2.0'
+group 'org.cbracis'
+description 'Foraging Model'
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test']
+        }
+        resources {
+            srcDirs = ['land', 'test']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'au.com.bytecode:opencsv:2.4'
+    implementation 'commons-cli:commons-cli:1.2'
+    implementation 'commons-collections:commons-collections:3.2'
+    implementation 'commons-configuration:commons-configuration:1.9'
+    implementation 'commons-io:commons-io:2.4'
+    implementation 'org.apache.commons:commons-exec:1.1'
+    implementation 'org.apache.commons:commons-lang3:3.1'
+    implementation 'org.apache.commons:commons-math3:3.2'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.7'
+    implementation 'org.rosuda.REngine:REngine:2.1.0'
+    implementation 'com.github.lucarosellini.rJava:REngine:0.9-7'
+
+    testImplementation 'org.mockito:mockito-all:1.9.5'
+    testImplementation group: 'org.testng', name: 'testng', version: '6.14.3'
+
+    runtimeOnly 'com.github.lucarosellini.rJava:JRIEngine:0.9-7'
+}
+
+test {
+    useTestNG()
+}
+
+mainClassName = 'ForagingModel.core.Runner'
+
+shadowJar {
+    mergeServiceFiles()
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+    manifest {
+        attributes 'Implementation-Title': rootProject.name
+        attributes 'Implementation-Version': rootProject.version
+        attributes 'Implementation-Vendor-Id': rootProject.group
+        attributes 'Build-Time': ZonedDateTime.now(ZoneId.of("UTC"))
+                .format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
+        attributes 'Built-By': InetAddress.localHost.hostName
+        attributes 'Created-By': 'Gradle ' + gradle.gradleVersion
+        attributes 'Main-Class': mainClassName
+    }
+    archiveName "ForagingModel-full-${rootProject.version}.jar"
+}
