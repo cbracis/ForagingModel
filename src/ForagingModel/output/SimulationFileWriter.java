@@ -28,6 +28,7 @@ import ForagingModel.core.Parameters.Parameter;
 import ForagingModel.core.Velocity;
 import ForagingModel.predator.Predator;
 import ForagingModel.space.MemoryAssemblage;
+import ForagingModel.space.MemoryAssemblage.State;
 
 public class SimulationFileWriter implements SimulationReporter 
 {
@@ -175,7 +176,8 @@ public class SimulationFileWriter implements SimulationReporter
 		{
 			reportTracks();
 			reportPredators();
-			reportMemory();
+			reportResourceMemory();
+			reportScentHistory();
 		}
 	}
 	
@@ -245,7 +247,17 @@ public class SimulationFileWriter implements SimulationReporter
 		writeToFile(results, encountersFile, false);
 	}
 	
-	public void reportMemory()
+	public void reportResourceMemory()
+	{
+		reportMemory(State.Resource, "Memory");
+	}
+
+	public void reportScentHistory()
+	{
+		reportMemory(State.Scent, "Scent");
+	}
+	
+	private void reportMemory(State state, String filePrefix)
 	{
 		// foragers
 		for (Agent agent : agents)
@@ -261,21 +273,24 @@ public class SimulationFileWriter implements SimulationReporter
 				if (behavior != null && behavior instanceof MemoryMovementBehavior)
 				{
 					memory = ((MemoryMovementBehavior) behavior).getMemory();
-					double[][] memoryValues = memory.reportCurrentState();
+					double[][] memoryValues = memory.reportCurrentState(state);
 					
-					File memFile = new File(tracksFolder, "Memory_sim=" + ModelEnvironment.getSimulationIndex() + 
-							"_id=" + id + ".csv");
-					
-					List<String[]> matrix = new ArrayList<String[]>();
-					
-					for (double[] row : memoryValues)
+					if (null != memoryValues)
 					{
-						// slightly circular, we split on comma to make an array, then the CSVWriter will put the commas back
-						String[] line = Arrays.toString(row).replace("[", "").replace("]", "").split(",");
-						matrix.add(line);
+						File memFile = new File(tracksFolder, filePrefix + "_sim=" + ModelEnvironment.getSimulationIndex() + 
+								"_id=" + id + ".csv");
+						
+						List<String[]> matrix = new ArrayList<String[]>();
+						
+						for (double[] row : memoryValues)
+						{
+							// slightly circular, we split on comma to make an array, then the CSVWriter will put the commas back
+							String[] line = Arrays.toString(row).replace("[", "").replace("]", "").split(",");
+							matrix.add(line);
+						}
+						
+						writeToFile(matrix, memFile, false);
 					}
-					
-					writeToFile(matrix, memFile, false);
 				}
 
 			}

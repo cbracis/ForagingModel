@@ -19,6 +19,7 @@ import ForagingModel.core.TestUtilities;
 import ForagingModel.predator.PredatorManager;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.MemoryAssemblage;
+import ForagingModel.space.MemoryAssemblage.State;
 import ForagingModel.space.ResourceAssemblage;
 
 public class RVisualizerTest 
@@ -55,7 +56,7 @@ public class RVisualizerTest
 		Mockito.when(resource.getMaxQuality()).thenReturn(3.0);
 
 		// TODO inject memory
-		Mockito.when(memory.reportCurrentState()).thenReturn(new double[][] { {0, 0, 0.5, 2}, {-1, -1, 0.5, 0.5}, {0, 2, 2, -1}, {0, 1, 1, 0} });
+		Mockito.when(memory.reportCurrentState(State.Resource)).thenReturn(new double[][] { {0, 0, 0.5, 2}, {-1, -1, 0.5, 0.5}, {0, 2, 2, -1}, {0, 1, 1, 0} });
 
 		Mockito.when(locManager.getAgentLocations(Forager.class)).thenReturn(Arrays.asList( new NdPoint(1,1) ));
 		

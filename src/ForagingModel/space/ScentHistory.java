@@ -109,9 +109,21 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 
 
 	@Override
-	public double[][] reportCurrentState() 
+	public double[][] reportCurrentState(State state) 
 	{
-		return scentMatrix.getData();
+		double[][] data;
+		switch (state)
+		{
+		case Scent:
+			data = scentMatrix.getData();
+			break;
+		case Resource:
+		case Predators:
+		default:
+			data = null;
+			break;
+		}
+		return data;
 	}
 
 	@Override

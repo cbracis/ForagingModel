@@ -225,9 +225,21 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 	}
 	
 	@Override
-	public double[][] reportCurrentState() 
+	public double[][] reportCurrentState(State state) 
 	{
-		return getMemory().getData();
+		double[][] data;
+		switch (state)
+		{
+		case Resource:
+			data = getMemory().getData();
+			break;
+		case Predators:
+		case Scent:
+		default:
+			data = null;
+			break;
+		}
+		return data;
 	}
 	
 	@Override

@@ -36,6 +36,7 @@ import ForagingModel.predator.Predator;
 import ForagingModel.predator.PredatorFactory;
 import ForagingModel.predator.PredatorManager;
 import ForagingModel.schedule.ScheduleFactory;
+import ForagingModel.space.MemoryAssemblage.State;
 
 public class AngularProbabiltyInfoTest 
 {
@@ -269,10 +270,10 @@ public class AngularProbabiltyInfoTest
 					{
 						for (MemoryAssemblage baseline : baselinePredatorMemories)
 						{
-							PredatorMemory predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baseline.reportCurrentState()), predatorMgr, standardInfo, 0, 0, 0, 0, memorySpatialScale, 0);
+							PredatorMemory predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baseline.reportCurrentState(State.Predators)), predatorMgr, standardInfo, 0, 0, 0, 0, memorySpatialScale, 0);
 							RealVector standardProbs = predatorMemory.getAngularProbabilities(foragerLoc);
 						
-							predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baseline.reportCurrentState()), predatorMgr, info, 0, 0, 0, 0, memorySpatialScale, 0);
+							predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baseline.reportCurrentState(State.Predators)), predatorMgr, info, 0, 0, 0, 0, memorySpatialScale, 0);
 							RealVector comparisonProbs = predatorMemory.getAngularProbabilities(foragerLoc);
 							double mse = computeMse(standardProbs, comparisonProbs);
 							totalMse += mse;
@@ -379,7 +380,7 @@ public class AngularProbabiltyInfoTest
 					}
 				}
 
-				PredatorMemory predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baselinePredatorMemory.reportCurrentState()), predatorMgr, standardInfo, 0, 0, 0, 0, memorySpatialScale, 0);
+				PredatorMemory predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baselinePredatorMemory.reportCurrentState(State.Predators)), predatorMgr, standardInfo, 0, 0, 0, 0, memorySpatialScale, 0);
 				RealVector standardPredatorProbs = predatorMemory.getAngularProbabilities(foragerLoc);
 
 				// now test each spacing
@@ -395,7 +396,7 @@ public class AngularProbabiltyInfoTest
 					csvWriter.writeNext(new String[] {"resource", "land" + landIdx, info.toString(), foragerLoc.toString(), Double.toString(mse)});
 					
 					// predator
-					predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baselinePredatorMemory.reportCurrentState()), predatorMgr, info, 0, 0, 0, 0, memorySpatialScale, 0);
+					predatorMemory = SpaceFactory.createPredatorMemory(new Array2DRowRealMatrix(baselinePredatorMemory.reportCurrentState(State.Predators)), predatorMgr, info, 0, 0, 0, 0, memorySpatialScale, 0);
 					comparisonProbs = predatorMemory.getAngularProbabilities(foragerLoc);
 					mse = computeMse(standardPredatorProbs, comparisonProbs);
 					predatorMse.set(i, predatorMse.get(i) + mse);

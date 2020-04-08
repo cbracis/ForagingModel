@@ -44,11 +44,23 @@ public class ScentAggregateMemory extends AbstractMemory implements
 	}
 
 	@Override
-	public double[][] reportCurrentState() 
+	public double[][] reportCurrentState(State state) 
 	{
-		// for now just report resource, need to adjust by scent??
-		RealMatrix probabilities = resourceMemory.getMemory();
-		return probabilities.getData();
+		double[][] data;
+		switch (state)
+		{
+		case Resource:
+			data = resourceMemory.reportCurrentState(state);
+			break;
+		case Scent:
+			data = scentHistory.reportCurrentState(state);
+			break;
+		case Predators:
+		default:
+			data = null;
+			break;
+		}
+		return data;
 	}
 
 	@Override

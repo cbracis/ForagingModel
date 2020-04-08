@@ -25,6 +25,7 @@ import ForagingModel.input.CellData;
 import ForagingModel.input.InputFactory;
 import ForagingModel.input.ResourceLandscapeReader;
 import ForagingModel.schedule.ScheduleFactory;
+import ForagingModel.space.MemoryAssemblage.State;
 
 public class ResourceMemoryTest 
 {
@@ -325,7 +326,7 @@ public class ResourceMemoryTest
 
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
 				1, 1, 1, 1, 0.5, 0.5, shortMemoryFactor, 1, 1, 1);
-		double[][] state = memory.reportCurrentState();
+		double[][] state = memory.reportCurrentState(State.Resource);
 		
 		TestUtilities.compareMatrix(new Array2DRowRealMatrix(state), expected, 1e-10);
 

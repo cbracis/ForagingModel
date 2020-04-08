@@ -3,12 +3,15 @@ package ForagingModel.output;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.math3.linear.RealVector;
+import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngine;
 import org.rosuda.REngine.REngineException;
@@ -26,6 +29,7 @@ import ForagingModel.core.Parameters;
 import ForagingModel.predator.PredatorManager;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.MemoryAssemblage;
+import ForagingModel.space.MemoryAssemblage.State;
 import ForagingModel.space.ResourceAssemblage;
 import ForagingModel.space.SpaceUtils;
 
@@ -39,6 +43,7 @@ public class RVisualizer implements SimulationVisualizer
 	private PredatorManager predatorManager;
 	private double predatorEncounterRadius;
 	private Forager forager;
+	private List<Forager> conspecifics;
 	private boolean plotMemory;
 	private DirectionProbabilityInfo probabilityInfo;
 	private double maxResource;
@@ -70,11 +75,17 @@ public class RVisualizer implements SimulationVisualizer
 	public void plotIteration(int iteration) 
 	{
 		double[][] resourceValues = resources.reportCurrentState();
-		List<NdPoint> foragerLocations = forager.getReporter().getLocationHistory();
-		double[][] foragerTrack = createLocationMatrix(foragerLocations);
+		double[][] foragerTrack = createLocationMatrix(Arrays.asList(forager));
+		double[][] conspecificTracks = createLocationMatrix(conspecifics);
 		int[] states = createStateArray(forager.getReporter().getStateHistory());
-		double[][] predatorLocations = createPredatorMatrix(foragerLocations.get(foragerLocations.size() - 1)); // last
+		double[][] predatorLocations = createPredatorMatrix(getCurrentForagerLocation());
 		String rFilePath = Parameters.get().getRFilePath();
+		
+//		System.out.println(Arrays.toString(resourceValues[0]));
+//		System.out.println(Arrays.deepToString(conspecificTracks));
+//		System.out.println(Arrays.toString(states));
+////		System.out.println(Arrays.toString(predatorLocations[0]));
+//		System.out.println(foragerLocations.toString());
 		
 		REngine re = null;
 		try 
@@ -85,12 +96,13 @@ public class RVisualizer implements SimulationVisualizer
 	        
 	        re.assign("resourceValues", org.rosuda.REngine.REXP.createDoubleMatrix(resourceValues));
 	        re.assign("foragerTrack", org.rosuda.REngine.REXP.createDoubleMatrix(foragerTrack));
+	        re.assign("conspecificTracks", org.rosuda.REngine.REXP.createDoubleMatrix(conspecificTracks));
 	        re.assign("states", states);
 	        re.assign("predatorLocations", org.rosuda.REngine.REXP.createDoubleMatrix(predatorLocations));
 	        re.assign("maxResource", new double[] { maxResource });
 	        if (plotMemory)
 	        {
-	    		double[][] memoryValues = memory.reportCurrentState();
+	    		double[][] memoryValues = memory.reportCurrentState(State.Resource);
 	        	re.assign("memoryValues", org.rosuda.REngine.REXP.createDoubleMatrix(memoryValues));
 	        	double[] destination = SpaceUtils.toArray(locationManager.getDestination(forager));
 	        	re.assign("destination", destination);
@@ -116,11 +128,14 @@ public class RVisualizer implements SimulationVisualizer
 	        
 	        if (plotMemory)
 	        {
-	        	re.parseAndEval("plotResourceAndMemoryAndProbability(resourceValues, memoryValues, foragingProbs, predatorProbs, aggregateProbs, foragerTrack, states, memoryUsage, destination, angle, emd, predatorLocations, maxResource, xyLim, iteration)");	        		
+	        	re.parseAndEval("plotResourceAndMemoryAndProbability(resourceValues, memoryValues, foragingProbs, predatorProbs, aggregateProbs, foragerTrack, conspecificTracks, states, memoryUsage, destination, angle, emd, predatorLocations, maxResource, xyLim, iteration)");	
+//	            System.out.println(result.asString());
+
 	        }
 	        else
 	        {	        
-	        	re.parseAndEval("plotResource(resourceValues, foragerTrack, states, predatorLocations, maxResource, xyLim, iteration)");
+	        	re.parseAndEval("plotResource(resourceValues, foragerTrack, conspecificTracks, states, predatorLocations, maxResource, xyLim, iteration)");
+//	            System.out.println(result.asString());
 	        }
 		} catch (ClassNotFoundException e) 
 		{
@@ -170,20 +185,43 @@ public class RVisualizer implements SimulationVisualizer
 		}
 		return memoryUseage;
 	}
-
-	private double[][] createLocationMatrix(List<NdPoint> locations)
+	
+	private double[][] createLocationMatrix(List<Forager> foragers)
 	{
-		// row is each location, columns are x and y
-		double[][] locationMatrix = new double[locations.size()][2];
+		double[][] locationMatrix = null;
 		
-		for (int i = 0; i < locations.size(); i++)
+		if (null != foragers && foragers.size() > 0)
 		{
-			NdPoint location = locations.get(i);
-			locationMatrix[i][0] = location.getX();
-			locationMatrix[i][1] = location.getY();
+			// need to get size of first forager's track to size array
+			int trackLength = foragers.get(0).getReporter().getLocationHistory().size();
+			
+			// row is each location, columns are id, x and y
+			locationMatrix = new double[foragers.size() * trackLength][3];
+			int row = 0;
+	
+			for (Forager forager : foragers)
+			{
+				int id = forager.getId();
+				List<NdPoint> locations = forager.getReporter().getLocationHistory();
+			
+				for (int i = 0; i < locations.size(); i++)
+				{
+					NdPoint location = locations.get(i);
+					locationMatrix[row][0] = id;
+					locationMatrix[row][1] = location.getX();
+					locationMatrix[row][2] = location.getY();
+					row++;
+				}
+			}
 		}
 		
 		return locationMatrix;
+	}
+	
+	private NdPoint getCurrentForagerLocation()
+	{
+		 List<NdPoint> foragerLocations = forager.getReporter().getLocationHistory();
+		 return foragerLocations.get(foragerLocations.size() - 1); // last one
 	}
 	
 	private int[] createStateArray(List<BehaviorState> stateHistory) 
@@ -199,16 +237,22 @@ public class RVisualizer implements SimulationVisualizer
 
 	protected double[][] createPredatorMatrix(NdPoint currentLocation) 
 	{
-		List<NdPoint> currentPredators = new ArrayList<NdPoint>(predatorManager.getActivePredators());
-		// row is each predator, columns are x, y, and encountered (0,1)
-		double[][] predatorMatrix = new double[currentPredators.size()][3];
+		double[][] predatorMatrix = null; //new double[][] {{0, 0, 1}};
 		
-		for (int i = 0; i < currentPredators.size(); i++)
+		if (null != predatorManager) // only if predation is enabled
 		{
-			NdPoint predLocation = currentPredators.get(i);
-			predatorMatrix[i][0] = predLocation.getX();
-			predatorMatrix[i][1] = predLocation.getY();
-			predatorMatrix[i][2] = SpaceUtils.getDistance(predLocation, currentLocation) < predatorEncounterRadius ? 1 : 0;
+			List<NdPoint> currentPredators = new ArrayList<NdPoint>(predatorManager.getActivePredators());
+			
+			// row is each predator, columns are x, y, and encountered (0,1)
+			predatorMatrix = new double[currentPredators.size()][3];
+			
+			for (int i = 0; i < currentPredators.size(); i++)
+			{
+				NdPoint predLocation = currentPredators.get(i);
+				predatorMatrix[i][0] = predLocation.getX();
+				predatorMatrix[i][1] = predLocation.getY();
+				predatorMatrix[i][2] = SpaceUtils.getDistance(predLocation, currentLocation) < predatorEncounterRadius ? 1 : 0;
+			}
 		}
 		
 		return predatorMatrix;
@@ -237,6 +281,8 @@ public class RVisualizer implements SimulationVisualizer
 		if (foragers.size() >= 1)
 		{
 			forager = foragers.get(0);
+			conspecifics = new ArrayList<Forager>(foragers);
+			conspecifics.remove(forager);
 			
 			// get memory
 			MovementBehavior behavior = ModelEnvironment.getMovementMapper().getMovement(forager);

@@ -98,9 +98,21 @@ public class PredatorMemory extends AbstractMemory implements MemoryAssemblage
 	}
 	
 	@Override
-	public double[][] reportCurrentState() 
+	public double[][] reportCurrentState(State state) 
 	{
-		return memories.getData();
+		double[][] data;
+		switch (state)
+		{
+		case Predators:
+			data = memories.getData();
+			break;
+		case Resource:
+		case Scent:
+		default:
+			data = null;
+			break;
+		}
+		return data;
 	}
 	
 	protected RealMatrix getMemory()

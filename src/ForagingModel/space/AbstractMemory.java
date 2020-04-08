@@ -325,7 +325,7 @@ public abstract class AbstractMemory implements MemoryAssemblage
 	@Override
 	public String toString()
 	{
-		return ToStringBuilder.reflectionToString(this.reportCurrentState());
+		return ToStringBuilder.reflectionToString(this.reportCurrentState(State.Resource)); // note resource is only memory that will always exist
 	}
 
 }

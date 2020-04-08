@@ -33,7 +33,7 @@ public class AbstractMemoryHelper extends AbstractMemory
 	}
 
 	@Override
-	public double[][] reportCurrentState() 
+	public double[][] reportCurrentState(State state) 
 	{
 		return null;
 	}

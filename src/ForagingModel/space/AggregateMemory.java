@@ -106,11 +106,23 @@ public class AggregateMemory extends AbstractMemory implements MemoryAssemblage
 	
 
 	@Override
-	public double[][] reportCurrentState() 
+	public double[][] reportCurrentState(State state) 
 	{
-		RealMatrix probabilities = resourceMemory.getMemory();
-		probabilities = probabilities.subtract(predatorMemory.getMemory());
-		return probabilities.getData();
+		double[][] data;
+		switch (state)
+		{
+		case Resource:
+			data = resourceMemory.reportCurrentState(state);
+			break;
+		case Predators:
+			data = predatorMemory.reportCurrentState(state);
+			break;
+		case Scent:
+		default:
+			data = null;
+			break;
+		}
+		return data;
 	}
 
 	@Override

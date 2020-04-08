@@ -9,6 +9,13 @@ import ForagingModel.schedule.Schedulable;
 
 public interface MemoryAssemblage extends Schedulable, Notifiable
 {
+	public enum State 
+	{
+		Resource,
+		Predators,
+		Scent
+	}
+	
 	public void learn(NdPoint consumerLocation);
 	
 	public NdPoint getDestinationProbabalistic(NdPoint currentLocation);
@@ -17,7 +24,7 @@ public interface MemoryAssemblage extends Schedulable, Notifiable
 
 	public DirectionProbabalistic getDirectionProbabalistic(NdPoint currentLocation, AngleBounds bounds);
 
-	public double[][] reportCurrentState();
+	public double[][] reportCurrentState(MemoryAssemblage.State state);
 	
 	public DirectionProbabilityInfo reportCurrentProbabilities();
 }
