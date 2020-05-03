@@ -19,7 +19,7 @@ import ForagingModel.core.NdPoint;
  * memory of the individual, but can take advantage of the existing memory machinery.
  * It is modeled closely on PredatorMemory.
  */
-public class ScentHistory extends AbstractMemory implements MemoryAssemblage 
+public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 {
 	private RealMatrix scentMatrix;
 
@@ -64,10 +64,7 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 	@Override
 	public void learn(NdPoint consumerLocation) 
 	{
-		// TODO use this for update or create a new interface used for updating?
-		// predator memory uses predator manager to get predators nearby then learn from them
-		// better might be to make a new method the Scent manager can call and pass in the 
-		// locations of the other foragers
+		throw new UnsupportedOperationException("learn() should not be called on ScentHistory.");
 	}
 	
 	public void depositScent(Set<NdPoint> conspecificLocations)

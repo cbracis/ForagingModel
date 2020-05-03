@@ -61,6 +61,7 @@ public class Parameters
 							NumSteps, // nSteps 
 							BurnInSteps,
 							RepeatSimulation,
+							NumThreads,
 							ResourceLandscapeFileName,
 							EmptyBorderSize,
 							StartPointsType,
@@ -224,6 +225,9 @@ public class Parameters
 
 		values.put( Parameter.RepeatSimulation, 1 );
 		types.put( Parameter.RepeatSimulation, ParameterType.Integer );
+
+		values.put( Parameter.NumThreads, 1 );
+		types.put( Parameter.NumThreads, ParameterType.Integer );
 
 		values.put( Parameter.ResourceLandscapeFileName, "" );
 		types.put( Parameter.ResourceLandscapeFileName, ParameterType.String );
@@ -661,6 +665,11 @@ public class Parameters
 	public int getRepeatSimulation()
 	{
 		return (Integer) values.get(Parameter.RepeatSimulation);
+	}
+
+	public int getNumThreads()
+	{
+		return (Integer) values.get(Parameter.NumThreads);
 	}
 
 	public int getRandomSeed()

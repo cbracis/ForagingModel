@@ -38,9 +38,9 @@ public class SpaceFactory
 		return new LocationMangerImpl(0, 0, landscapeSize, landscapeSize);
 	}
 	
-	public static ScentManager createScentManager(LocationManager locationManager)
+	public static ScentManager createScentManager(LocationManager locationManager, int numThreads)
 	{
-		return new ScentManager(locationManager);
+		return new ScentManager(locationManager, numThreads);
 	}
 
 	public static ResourceAssemblage generateResource(List<CellData> resourceData, Scheduler scheduler) 

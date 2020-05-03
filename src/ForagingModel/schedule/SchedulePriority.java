@@ -9,6 +9,7 @@ public enum SchedulePriority
 	ResourceGrow(4),
 	MemoryDecay(5),
 	Visualize(10),
+	Shutdown(20),
 	Last(Integer.MAX_VALUE);
 	
 	private final int value;   

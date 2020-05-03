@@ -54,8 +54,9 @@ public class ModelBuilder
 			ScentManager scentManager = null;
 			if (params.getScentTracking())
 			{
-				scentManager = SpaceFactory.createScentManager(locationManager);
+				scentManager = SpaceFactory.createScentManager(locationManager, params.getNumThreads());
 				scheduler.register(scentManager, SchedulePriority.ForagerDepositScent);
+				scheduler.registerAtEnd(scentManager, SchedulePriority.Shutdown);
 			}
 			
 			// load resources data from file (may be null if no file)
