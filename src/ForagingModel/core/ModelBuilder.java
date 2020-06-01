@@ -3,6 +3,8 @@ package ForagingModel.core;
 import java.io.File;
 import java.util.List;
 
+import ForagingModel.agent.Agent;
+import ForagingModel.agent.Agent.Sex;
 import ForagingModel.agent.AgentFactory;
 import ForagingModel.input.CellData;
 import ForagingModel.input.InputFactory;
@@ -15,6 +17,7 @@ import ForagingModel.schedule.SchedulePriority;
 import ForagingModel.schedule.Scheduler;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.ResourceAssemblage;
+import ForagingModel.space.ScentHistory;
 import ForagingModel.space.ScentManager;
 import ForagingModel.space.SpaceFactory;
 
@@ -49,15 +52,6 @@ public class ModelBuilder
 			
 			// to track forager
 			LocationManager locationManager = SpaceFactory.createLocationManager(); 
-
-			// optionally track scent if enabled
-			ScentManager scentManager = null;
-			if (params.getScentTracking())
-			{
-				scentManager = SpaceFactory.createScentManager(locationManager, params.getNumThreads());
-				scheduler.register(scentManager, SchedulePriority.ForagerDepositScent);
-				scheduler.registerAtEnd(scentManager, SchedulePriority.Shutdown);
-			}
 			
 			// load resources data from file (may be null if no file)
 			List<CellData> resourceData = reader.readLandscapeFile(params.getResourceLandscapeFile(), params.getEmptyBorderSize());
@@ -65,12 +59,60 @@ public class ModelBuilder
 			// create resources, sets landscape size
 			ResourceAssemblage resources = (resourceData == null) ? SpaceFactory.generateTwoPatchResource(scheduler) // not possible to have empty border
 																  : SpaceFactory.generateResource(resourceData, scheduler);
-	
 			
-			// forager start at center or randomly depending on StartPointType
-			int numForagers = params.getForagerNumber();
-			AgentFactory.createAndPlaceForagers(numForagers, locationManager, resources, 
-					predatorManager, scentManager, scheduler);
+			if (params.getForagerBySex())
+			{
+				// need to create foragers and scent tracking by sex
+				ScentManager femaleScentManager = null;
+				ScentManager maleScentManager = null;
+				ScentHistory allFemales = null;
+				
+				if (params.getScentTracking())
+				{
+					femaleScentManager = SpaceFactory.createScentManager(locationManager, params.getNumThreads());
+					scheduler.register(femaleScentManager, SchedulePriority.ForagerDepositScent);
+					scheduler.registerAtEnd(femaleScentManager, SchedulePriority.Shutdown);
+					
+					allFemales = SpaceFactory.createAllFemalesScentHistory(scheduler, femaleScentManager);
+					
+					maleScentManager = SpaceFactory.createScentManager(locationManager, params.getNumThreads());
+					scheduler.register(maleScentManager, SchedulePriority.ForagerDepositScent);
+					scheduler.registerAtEnd(maleScentManager, SchedulePriority.Shutdown);
+				}
+				
+				// forager start at center or randomly depending on StartPointType
+				int numFemaleForagers = params.getForagerNumberFemale();
+				int numMaleForagers = params.getForagerNumberMale();
+				
+				// first create female foragers that only avoid each other
+				AgentFactory.createAndPlaceForagers(numFemaleForagers, locationManager, 
+						Sex.Female, resources, predatorManager, 
+						femaleScentManager, null, scheduler);
+				
+				// then create male foragers that need to be attracted to female foragers too
+				AgentFactory.createAndPlaceForagers(numMaleForagers, locationManager, 
+						Sex.Male, resources, predatorManager, 
+						maleScentManager, allFemales, scheduler);
+
+
+			}
+			else
+			{
+				// optionally track scent if enabled
+				ScentManager scentManager = null;
+				if (params.getScentTracking())
+				{
+					scentManager = SpaceFactory.createScentManager(locationManager, params.getNumThreads());
+					scheduler.register(scentManager, SchedulePriority.ForagerDepositScent);
+					scheduler.registerAtEnd(scentManager, SchedulePriority.Shutdown);
+				}
+				
+				// forager start at center or randomly depending on StartPointType
+				int numForagers = params.getForagerNumber();
+				AgentFactory.createAndPlaceForagers(numForagers, locationManager, 
+						Sex.Unknown, resources, predatorManager, 
+						scentManager, null, scheduler);
+			}
 			
 			// visualization
 			if (params.getVisualizeSimulation())

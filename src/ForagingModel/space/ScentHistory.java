@@ -9,6 +9,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.FastMath;
 
+import ForagingModel.core.EnsurePositive;
 import ForagingModel.core.GridPoint;
 import ForagingModel.core.MatrixUtils;
 import ForagingModel.core.NdPoint;
@@ -133,8 +134,36 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 	@Override
 	protected RealVector getAngularProbabilities(NdPoint currentLocation) 
 	{
-		// TODO needed? shouldn't be called directly
-		return null;
+		// Needed for the case of males attracted to females
+		List<Double> angles = angProbInfo.getAngles();
+		RealVector probs = new ArrayRealVector(angles.size());
+
+		for (int angleIdx = 0; angleIdx < angles.size(); angleIdx++)
+		{
+			List<GridPoint> samplePoints = angProbInfo.getSamplePoints(currentLocation, angles.get(angleIdx));
+			RealVector sampleValues = new ArrayRealVector(samplePoints.size());
+			
+			for (int pointIdx = 0; pointIdx < samplePoints.size(); pointIdx++)
+			{
+				GridPoint point = samplePoints.get(pointIdx);
+				sampleValues.setEntry(pointIdx, 
+						scentMatrix.getEntry(point.getX(), point.getY()) * distanceFactor.getEntry(pointIdx));
+			}
+			
+		}
+
+		// ensure positive and not all 0
+//		probs.mapToSelf(new EnsurePositive());
+//		assert(probs.getMinValue() >= 0);
+		
+//		double sum = MatrixUtils.sum(probs);
+
+		normalizeVector(probs);
+		// TODO probability cache??
+//		probabilityCache.updateForaging(probs, sum);
+		
+		return probs;
+
 	}
 	
 	// This is called by AggregateScentMemory to get the safety values to multiply resource memory

@@ -108,7 +108,7 @@ public class SpaceFactoryTest
 		Recorder recorder = Mockito.mock(Recorder.class);
 		
 		MovementBehavior movement = MovementFactory.createMovement(resources, 
-				predatorManager, null, 1.0, locationManager, 
+				predatorManager, null, null, 1.0, locationManager, 
 				new NdPoint(5, 5), scheduler, recorder);
 	
 		Assert.assertTrue(movement instanceof MemoryMovementBehavior, "memory");

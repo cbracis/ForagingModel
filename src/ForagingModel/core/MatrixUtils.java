@@ -114,6 +114,31 @@ public class MatrixUtils
 	}
 	
 	/**
+	 * Sums the corresponding values in a and b, resulting in a new vector of the same length
+	 * @param a vector to sum
+	 * @param b vector to sum
+	 * @return new vector consisting of a[i] + b[i], or null if a and b are of different lengths
+	 */
+	public static RealVector sum(RealVector a, RealVector b)
+	{
+		if (a.getDimension() != b.getDimension())
+		{
+			return null;
+		}
+		int size = a.getDimension();
+		
+		RealVector c = new ArrayRealVector(size);
+		
+		for (int i = 0; i < size; i++)
+		{
+			c.setEntry(i, a.getEntry(i) + b.getEntry(i));
+		}
+		
+		return c;
+	}
+
+	
+	/**
 	 * Return the cardinality (number of non-zero cells) of the matrix
 	 * @param matrix the matrix
 	 * @return cardinality

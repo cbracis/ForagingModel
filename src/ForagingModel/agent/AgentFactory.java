@@ -3,6 +3,7 @@ package ForagingModel.agent;
 import java.util.ArrayList;
 import java.util.List;
 
+import ForagingModel.agent.Agent.Sex;
 import ForagingModel.agent.movement.MovementBehavior;
 import ForagingModel.agent.movement.MovementFactory;
 import ForagingModel.core.ModelEnvironment;
@@ -13,13 +14,16 @@ import ForagingModel.schedule.SchedulePriority;
 import ForagingModel.schedule.Scheduler;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.ResourceAssemblage;
+import ForagingModel.space.ScentHistory;
 import ForagingModel.space.ScentManager;
 
 public class AgentFactory 
 {
 
-	public static Forager createAndPlaceForager(LocationManager space, ResourceAssemblage resource, 
-			PredatorManager predatorManager, ScentManager scentManager, 
+	public static Forager createAndPlaceForager(LocationManager space, 
+			Sex sex, ResourceAssemblage resource, 
+			PredatorManager predatorManager, 
+			ScentManager scentManager, ScentHistory allFemales,
 			NdPoint startingLocation, Scheduler scheduler)
 	{
 		Parameters params = Parameters.get();
@@ -32,8 +36,9 @@ public class AgentFactory
 
 		Recorder recorder = AgentFactory.createRecorder(numIntervals, numBurnInIntervals, resource.getNumPercentileBins(), 
 										 intervalSize, predatorManager); // need 1 per forager
-		Forager forager = createForager(space, resource, 
-				MovementFactory.createMovement(resource, predatorManager, scentManager,
+		Forager forager = createForager(space, sex, resource, 
+				MovementFactory.createMovement(resource, predatorManager, 
+						scentManager, allFemales,
 						averageConsumption, space, startingLocation, 
 						scheduler, recorder), 
 				recorder, 
@@ -49,32 +54,35 @@ public class AgentFactory
 		
 		return forager;
 	}
-	
-	public static List<Forager> createAndPlaceForagers(int numForagers, LocationManager space, ResourceAssemblage resource, 
-			PredatorManager predatorManager, ScentManager scentManager, Scheduler scheduler)
+		
+	public static List<Forager> createAndPlaceForagers(int numForagers, LocationManager space, 
+			Sex sex, ResourceAssemblage resource, 
+			PredatorManager predatorManager, ScentManager scentManager, ScentHistory allFemales,
+			Scheduler scheduler)
 	{
 		List<Forager> foragers = new ArrayList<Forager>(numForagers);
 		
 		for (int i = 0; i < numForagers; i++)
 		{
 			NdPoint startingLocation = Parameters.get().getStartingLocation();
-			foragers.add(createAndPlaceForager(space, resource, predatorManager, scentManager,
+			foragers.add(createAndPlaceForager(space, sex, resource, predatorManager, 
+					scentManager, allFemales,
 					startingLocation, scheduler));
 		}
 		return foragers;
 	}
-	
+		
 	public static Recorder createRecorder(int numIterations, int numBurnInIterations, int numQualityBins, double intervalSize,
 			PredatorManager predManager)
 	{
 		return new Recorder(numIterations, numBurnInIterations, numQualityBins, intervalSize, predManager);
 	}
  
-	protected static Forager createForager(LocationManager space, 
+	protected static Forager createForager(LocationManager space, Sex sex,
 			ResourceAssemblage resource, MovementBehavior movement, Recorder recorder,
 			double averageConsumption, double consumptionRate, double consumptionSpatialScale)
 	{
-		Forager forager = new Forager(space, resource, movement, recorder, 
+		Forager forager = new Forager(space, sex, resource, movement, recorder, 
 				averageConsumption, consumptionRate, consumptionSpatialScale);
 		ModelEnvironment.getMovementMapper().register(movement, forager);
 		

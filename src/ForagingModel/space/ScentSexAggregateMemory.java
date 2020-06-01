@@ -8,20 +8,25 @@ import ForagingModel.core.NdPoint;
 
 /**
  * This class implements memory based on a resource memory and a scent map. That is, 
- * forager attracted to resources and repulsed by conspecifics.
+ * forager attracted to resources and repulsed by conspecifics. However, in this case,
+ * males in particular are repulsed only by other males (the scentHistory) but attracted
+ * to females (the femaleHistory).
  * It is modeled closely on AggregateMemory.
  */
-public class ScentAggregateMemory extends AbstractMemory implements
+public class ScentSexAggregateMemory extends AbstractMemory implements
 		MemoryAssemblage 
 {
 	private ResourceMemory resourceMemory;
 	private ScentHistory scentHistory;
+	private ScentHistory femaleHistory;
 	
-	protected ScentAggregateMemory(ResourceMemory resourceMemory, ScentHistory scentHistory)
+	protected ScentSexAggregateMemory(ResourceMemory resourceMemory, ScentHistory scentHistory,
+			ScentHistory femaleHistory)
 	{
 		super(resourceMemory.angProbInfo);
 		this.resourceMemory = resourceMemory;
 		this.scentHistory = scentHistory;
+		this.femaleHistory = femaleHistory;
 		
 		// set resource and scent to use same probability cache
 		this.resourceMemory.probabilityCache = this.probabilityCache;
@@ -34,13 +39,14 @@ public class ScentAggregateMemory extends AbstractMemory implements
 	{
 		resourceMemory.decay();
 		scentHistory.decay();
+		// TODO need to decay female history but it is shared and only want to do it once!
 	}
 
 	@Override
 	public void learn(NdPoint consumerLocation) 
 	{
 		resourceMemory.learn(consumerLocation);
-		// scent updating handled by ScentManger
+		// scent updating handled by ScentManager
 	}
 
 	@Override
@@ -78,9 +84,15 @@ public class ScentAggregateMemory extends AbstractMemory implements
 	{
 		RealVector resourceProbs = resourceMemory.getAngularProbabilities(currentLocation);
 		RealVector conspecificSafety = scentHistory.getConspecificSafety(currentLocation);
+		RealVector femalesProbs = femaleHistory.getAngularProbabilities(currentLocation);
+		
+		// for now add resource and female probs then renormalize, but obs other appraoches
+		// such as first adding the matrices, then calculating the probablitites
+		RealVector attractiveProbs = MatrixUtils.sum(resourceProbs, femalesProbs);
+		normalizeVector(attractiveProbs);
 
 		// multiply resource prob by conspecific safety which ranges [0,1] but doesn't sum to 1
-		RealVector aggregateProbs = MatrixUtils.multiply(resourceProbs, conspecificSafety);
+		RealVector aggregateProbs = MatrixUtils.multiply(attractiveProbs, conspecificSafety);
 		
 		if (!normalizeVector(aggregateProbs))
 		{

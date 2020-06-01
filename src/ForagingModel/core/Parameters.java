@@ -34,6 +34,9 @@ public class Parameters
 							ForagerAnglePersistanceSearch, 
 							ForagerAnglePersistanceFeeding,
 							ForagerNumber,
+							ForagerBySex,
+							ForagerNumberFemale,
+							ForagerNumberMale,
 							IntervalSize, // dt
 							AvgConsumptionIsFullyInformed, // learn avg consumption or calculate from landscape
 							AvgConsumptionLearningRate, // learning rate for avg consumption if learned
@@ -126,6 +129,15 @@ public class Parameters
 
 		values.put( Parameter.ForagerNumber, 1 );
 		types.put( Parameter.ForagerNumber, ParameterType.Integer );
+		
+		values.put( Parameter.ForagerBySex, false );
+		types.put( Parameter.ForagerBySex, ParameterType.Boolean );
+		
+		values.put( Parameter.ForagerNumberFemale, 0 );
+		types.put( Parameter.ForagerNumberFemale, ParameterType.Integer );
+
+		values.put( Parameter.ForagerNumberMale, 0 );
+		types.put( Parameter.ForagerNumberMale, ParameterType.Integer );
 
 		values.put( Parameter.ForagerSpeedSearch, 2.0 );
 		types.put( Parameter.ForagerSpeedSearch, ParameterType.Double );
@@ -452,6 +464,20 @@ public class Parameters
 		return (Integer) values.get(Parameter.ForagerNumber);
 	}
 
+	public boolean getForagerBySex()
+	{
+		return (Boolean) values.get(Parameter.ForagerBySex);
+	}
+	
+	public int getForagerNumberFemale()
+	{
+		return (Integer) values.get(Parameter.ForagerNumberFemale);
+	}
+	
+	public int getForagerNumberMale()
+	{
+		return (Integer) values.get(Parameter.ForagerNumberMale);
+	}
 
 	public double getForagerSpeedSearch()
 	{
@@ -962,6 +988,13 @@ public class Parameters
 		// predators and scent not currently both supported
 		if (getPredation() && getScentTracking())
 		{ valid = false; }
+		
+		// if using sex-specific foragers, make sure numbers add up
+		if (getForagerBySex())
+		{
+			if ((getForagerNumberFemale() + getForagerNumberMale()) != getForagerNumber())
+			{ valid = false; }
+		}
 
 		return valid;
 	}

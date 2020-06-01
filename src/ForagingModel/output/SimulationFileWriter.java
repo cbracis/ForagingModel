@@ -14,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import ForagingModel.agent.Agent;
+import ForagingModel.agent.Agent.Sex;
 import ForagingModel.agent.Forager;
 import ForagingModel.agent.Reporter;
 import ForagingModel.agent.Reporter.SummaryMetric;
@@ -186,7 +187,7 @@ public class SimulationFileWriter implements SimulationReporter
 		File tracksFile = new File(tracksFolder, "Tracks" + ModelEnvironment.getSimulationIndex() + ".csv");
 		
 		List<String[]> results = new ArrayList<String[]>();
-		results.add(new String[] { "id", "x", "y", "behavior", "consumption", "mu" });
+		results.add(new String[] { "id", "sex", "x", "y", "behavior", "consumption", "mu" });
 		
 		// foragers
 		for (Agent agent : agents)
@@ -195,6 +196,7 @@ public class SimulationFileWriter implements SimulationReporter
 			{
 				Forager forager = (Forager) agent;
 				int id = forager.getId();
+				Sex sex = forager.getSex();
 				Reporter reporter = forager.getReporter();
 				List<NdPoint> track = reporter.getLocationHistory();
 				List<BehaviorState> states = reporter.getStateHistory();
@@ -203,9 +205,10 @@ public class SimulationFileWriter implements SimulationReporter
 				
 				for (int i = 0; i < track.size(); i++) // assume track, states, and consumption are same length
 				{
-					// forager id, x, y (could add more like state, consumption, etc)
+					// forager id, x, y, etc
 					String[] line = new String[] {
-							Integer.toString(id), 
+							Integer.toString(id),
+							sex.toString(),
 							Double.toString(track.get(i).getX()), 
 							Double.toString(track.get(i).getY()),
 							states.get(i).toString(),

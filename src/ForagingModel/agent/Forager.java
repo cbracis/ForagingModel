@@ -19,6 +19,7 @@ public class Forager extends Agent implements MovingAgent
 {
 	private static int currentAvailableId = 0;
 	private int id;
+	private Sex sex;
 	
 	private LocationManager space;
 	private ResourceAssemblage resource;
@@ -31,11 +32,12 @@ public class Forager extends Agent implements MovingAgent
 	
 	private double currentConsumption = 0;
 	
-	protected Forager(LocationManager space, 
+	protected Forager(LocationManager space, Sex sex,
 			ResourceAssemblage resource, MovementBehavior movementBehavior, Recorder recorder,
 			double averageConsumption, double consumptionRate, double consumptionSpatialScale)
 	{
 		this.space = space;
+		this.sex = sex;
 		this.resource = resource;
 		this.movementBehavior = movementBehavior;
 		this.recorder = recorder;
@@ -87,6 +89,11 @@ public class Forager extends Agent implements MovingAgent
 	public int getId()
 	{
 		return id;
+	}
+
+	public Sex getSex()
+	{
+		return sex;
 	}
 
 	public BehaviorState getState() 

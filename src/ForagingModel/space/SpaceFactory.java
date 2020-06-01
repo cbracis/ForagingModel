@@ -8,6 +8,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import ForagingModel.agent.Agent;
 import ForagingModel.core.ForagingModelException;
 import ForagingModel.core.GridPoint;
 import ForagingModel.core.MatrixUtils;
@@ -164,7 +165,7 @@ public class SpaceFactory
 	}
 
 	public static MemoryAssemblage createMemoryAssemblage(ResourceAssemblage resources, 
-			PredatorManager predatorManager, ScentManager scentManager, 
+			PredatorManager predatorManager, ScentManager scentManager, ScentHistory femalesHistory,
 			Scheduler scheduler)
 	{
 		// note that this might eventually get more complicated with different decision rules
@@ -180,11 +181,19 @@ public class SpaceFactory
 			PredatorMemory predatorMemory = createPredatorMemory(predatorManager);
 			memory = createAggregateMemory(resourceMemory, predatorMemory);
 		}
-		else if (null != scentManager && null == predatorManager && !Parameters.get().getPredation())
+		else if (null != scentManager && null == femalesHistory && 
+				null == predatorManager && !Parameters.get().getPredation())
 		{
 			ScentHistory scentHistory = createScentHistory();
 			scentManager.add(scentHistory);
 			memory = createScentAggregateMemory(resourceMemory, scentHistory);
+		}
+		else if (null != scentManager && null != femalesHistory && 
+				null == predatorManager && !Parameters.get().getPredation())
+		{
+			ScentHistory scentHistory = createScentHistory();
+			scentManager.add(scentHistory);
+			memory = createScentSexAggregateMemory(resourceMemory, scentHistory, femalesHistory);
 		}
 		else if (null != scentManager && null != predatorManager)
 		{
@@ -273,6 +282,22 @@ public class SpaceFactory
 				decayRate, scentSpatialScal, scentResponseFactor, intervalSize);
 	}
 	
+	public static ScentHistory createAllFemalesScentHistory(Scheduler scheduler, ScentManager manager)
+	{
+		ScentHistory allFemalesHistory = createScentHistory();
+		ScentHistoryContainer container = createScentHistoryContainer(allFemalesHistory);
+		manager.add(allFemalesHistory);
+		manager.add((Agent)null); // so will record all females
+		scheduler.register(container, SchedulePriority.MemoryDecay); // scent usually decayed with memory for individual's scenthistory
+		
+		return allFemalesHistory;
+	}
+	
+	protected static ScentHistoryContainer createScentHistoryContainer(ScentHistory scentHistory)
+	{
+		return new ScentHistoryContainer(scentHistory);
+	}
+	
 	protected static AggregateMemory createAggregateMemory(ResourceMemory resourceMemory, PredatorMemory predatorMemory)
 	{
 		return createAggregateMemory(resourceMemory, predatorMemory, Parameters.get().getFoodSafetyTradeoff());
@@ -286,6 +311,11 @@ public class SpaceFactory
 	protected static ScentAggregateMemory createScentAggregateMemory(ResourceMemory resourceMemory, ScentHistory scentHistory)
 	{
 		return new ScentAggregateMemory(resourceMemory, scentHistory);
+	}
+
+	protected static ScentSexAggregateMemory createScentSexAggregateMemory(ResourceMemory resourceMemory, ScentHistory scentHistory, ScentHistory femalesHistory)
+	{
+		return new ScentSexAggregateMemory(resourceMemory, scentHistory, femalesHistory);
 	}
 
 }
