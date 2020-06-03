@@ -1,8 +1,6 @@
 package ForagingModel.output;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,7 +10,6 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 
-import au.com.bytecode.opencsv.CSVWriter;
 import ForagingModel.agent.Agent;
 import ForagingModel.agent.Agent.Sex;
 import ForagingModel.agent.Forager;
@@ -21,7 +18,6 @@ import ForagingModel.agent.Reporter.SummaryMetric;
 import ForagingModel.agent.movement.BehaviorState;
 import ForagingModel.agent.movement.MemoryMovementBehavior;
 import ForagingModel.agent.movement.MovementBehavior;
-import ForagingModel.core.ForagingModelException;
 import ForagingModel.core.ModelEnvironment;
 import ForagingModel.core.NdPoint;
 import ForagingModel.core.Parameters;
@@ -171,7 +167,7 @@ public class SimulationFileWriter implements SimulationReporter
 			}
 		}
 		
-		writeToFile(results, resultsFile, true);
+		FileUtils.writeToFile(results, resultsFile, true);
 		
 		if (Parameters.get().getSaveTracks())
 		{
@@ -219,7 +215,7 @@ public class SimulationFileWriter implements SimulationReporter
 			}
 		}
 		
-		writeToFile(results, tracksFile, false);
+		FileUtils.writeToFile(results, tracksFile, false);
 	}
 
 	public void reportPredators() 
@@ -247,7 +243,7 @@ public class SimulationFileWriter implements SimulationReporter
 			}
 		}
 		
-		writeToFile(results, encountersFile, false);
+		FileUtils.writeToFile(results, encountersFile, false);
 	}
 	
 	public void reportResourceMemory()
@@ -292,64 +288,12 @@ public class SimulationFileWriter implements SimulationReporter
 							matrix.add(line);
 						}
 						
-						writeToFile(matrix, memFile, false);
+						FileUtils.writeToFile(matrix, memFile, false);
 					}
 				}
 
 			}
 		}
-	}
-
-	private void writeToFile(String[] stringsToWrite, File fileToWrite, boolean append)
-	{
-		CSVWriter csvWriter = null;
-		try
-		{
-			csvWriter = new CSVWriter(new FileWriter(fileToWrite, append), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
-
-			csvWriter.writeNext(stringsToWrite);
-		} 
-		catch (IOException e) 
-		{
-			throw new ForagingModelException("Exception writing to file: " + fileToWrite.getAbsolutePath(), e);
-		}
-		finally
-		{
-			if (csvWriter != null)
-			{
-				try 
-				{
-					csvWriter.close();
-				} catch (IOException ignored) {}
-			}
-		}
-		
-	}
-	
-	private void writeToFile(List<String[]> stringsToWrite, File fileToWrite, boolean append)
-	{
-		CSVWriter csvWriter = null;
-		try
-		{
-			csvWriter = new CSVWriter(new FileWriter(fileToWrite, append), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
-
-			csvWriter.writeAll(stringsToWrite);
-		} 
-		catch (IOException e) 
-		{
-			throw new ForagingModelException("Exception writing to file: " + fileToWrite.getAbsolutePath(), e);
-		}
-		finally
-		{
-			if (csvWriter != null)
-			{
-				try 
-				{
-					csvWriter.close();
-				} catch (IOException ignored) {}
-			}
-		}
-		
 	}
 
 	
@@ -388,7 +332,7 @@ public class SimulationFileWriter implements SimulationReporter
 				}
 			}
 			
-			writeToFile(header, resultsFile, false);
+			FileUtils.writeToFile(header, resultsFile, false);
 		}
 	}
 

@@ -98,7 +98,7 @@ public class AggregateMemory extends AbstractMemory implements MemoryAssemblage
 			normalizeVector(aggregateProbs);
 		}
 		
-		probabilityCache.updateAggregate(aggregateProbs, 0);
+		probabilityCache.updateAggregate(aggregateProbs);
 //		System.out.printf("i = %d, f = %.2e, p = %.2e\n", currentInterval, probabilityCache.foragingSum(), probabilityCache.predatorSum());
 		
 		return aggregateProbs;

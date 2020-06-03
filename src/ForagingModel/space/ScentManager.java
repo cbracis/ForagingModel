@@ -52,10 +52,15 @@ public class ScentManager implements Schedulable
 	
 	private void depositScent()
 	{
-		//here need to call all ScentHistories to update
-		// assumption that getting all agents from scentHistories or locationManager is same...
+		// here need to call all ScentHistories to update
+		// we are getting the agents to deposit the scent also from the keyset and not 
+		// locManager, because if we have males and females separately, only those in the 
+		// same ScentManager should deposit scent
+		// if there is a null key as well, this is where the "allFemales" ScentHistory
+		// is stored and should be updated by all females
+
 		Set<Agent> keys = scentHistories.keySet();
-		List<Agent> agents = locManager.getAgents();
+		Set<Agent> agents = scentHistories.keySet();
 		
 		// here is the list of tasks to give the thread pool
 		List<Callable<Void>> taskList = new ArrayList<Callable<Void>>();
@@ -68,8 +73,8 @@ public class ScentManager implements Schedulable
 			
 			for (Agent agent : agents)
 			{
-				// forager doesn't avoid own scent
-				if (agent != key)
+				// forager doesn't avoid own scent, also skip null key
+				if (agent != key && agent != null)
 				{
 					conspecifics.add(locManager.getLocation(agent));
 				}
@@ -78,6 +83,8 @@ public class ScentManager implements Schedulable
 			taskList.add(ScentHistoryUpdater.create(scentsToUpdate, conspecifics));
 			//scentsToUpdate.depositScent(conspecifics);			
 		}
+		
+		
 		try 
 		{
             executor.invokeAll(taskList);

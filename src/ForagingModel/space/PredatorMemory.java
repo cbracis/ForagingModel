@@ -207,7 +207,6 @@ public class PredatorMemory extends AbstractMemory implements MemoryAssemblage
 			probsUntruncated.setEntry(angleIdx, value);
 			probs.setEntry(angleIdx, FastMath.min(value, MAX_PREDATOR_VALUE)); // TODO: or explicitly max at 1
 		}
-		double sum = MatrixUtils.sum(probs);
 		
 		// if all sum to one, replace with untruncated values divided by max so go in less bad direction
 		// this is important for smaller memory spatial scale values
@@ -219,7 +218,7 @@ public class PredatorMemory extends AbstractMemory implements MemoryAssemblage
 		
 		// this gives safety = 1 - threat (no longer a probability distribution)
 		probs.mapMultiplyToSelf(-1).mapAddToSelf(1);
-		probabilityCache.updatePredator(probs, sum);
+		probabilityCache.updatePredator(probs);
 		
 		return probs;
 	}

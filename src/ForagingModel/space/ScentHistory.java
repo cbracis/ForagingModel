@@ -150,17 +150,12 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 						scentMatrix.getEntry(point.getX(), point.getY()) * distanceFactor.getEntry(pointIdx));
 			}
 			
+			probs.setEntry(angleIdx, MatrixUtils.sum(sampleValues)); 
 		}
 
-		// ensure positive and not all 0
-//		probs.mapToSelf(new EnsurePositive());
-//		assert(probs.getMinValue() >= 0);
-		
-//		double sum = MatrixUtils.sum(probs);
-
 		normalizeVector(probs);
-		// TODO probability cache??
-//		probabilityCache.updateForaging(probs, sum);
+		// because this ScentHistory is shared amongst all males, the probability cache
+		// update takes place at the aggregate level
 		
 		return probs;
 
@@ -192,12 +187,10 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 			double value = MatrixUtils.sum(sampleValues); 			
 			safety.setEntry(angleIdx, FastMath.min(value, MAX_SCENT_VALUE)); 
 		}
-		double sum = MatrixUtils.sum(safety);
-		
 		
 		// this gives safety = 1 - threat (no longer a probability distribution)
 		safety.mapMultiplyToSelf(-1).mapAddToSelf(1);
-		probabilityCache.updatePredator(safety, sum);
+		probabilityCache.updateRepulsiveScent(safety);
 		
 		return safety;
 	}

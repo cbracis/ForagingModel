@@ -78,7 +78,7 @@ public class ScentAggregateMemory extends AbstractMemory implements
 	{
 		RealVector resourceProbs = resourceMemory.getAngularProbabilities(currentLocation);
 		RealVector conspecificSafety = scentHistory.getConspecificSafety(currentLocation);
-
+		
 		// multiply resource prob by conspecific safety which ranges [0,1] but doesn't sum to 1
 		RealVector aggregateProbs = MatrixUtils.multiply(resourceProbs, conspecificSafety);
 		
@@ -89,7 +89,7 @@ public class ScentAggregateMemory extends AbstractMemory implements
 			normalizeVector(aggregateProbs);
 		}
 		
-		probabilityCache.updateAggregate(aggregateProbs, 0);
+		probabilityCache.updateAggregate(aggregateProbs);
 		
 		return aggregateProbs;
 	}

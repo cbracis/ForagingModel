@@ -3,7 +3,6 @@ package ForagingModel.core;
 import java.io.File;
 import java.util.List;
 
-import ForagingModel.agent.Agent;
 import ForagingModel.agent.Agent.Sex;
 import ForagingModel.agent.AgentFactory;
 import ForagingModel.input.CellData;
@@ -114,13 +113,18 @@ public class ModelBuilder
 						scentManager, null, scheduler);
 			}
 			
+			File results = params.getResultsFile();
+
 			// visualization
 			if (params.getVisualizeSimulation())
 			{
 				OutputFactory.createSimulationVisualizer(resources, locationManager, predatorManager, scheduler);
 			}
+			if (params.getVisualizeProbabilities())
+			{
+				OutputFactory.createSimulationVisualizer(locationManager, results, scheduler);
+			}
 			
-			File results = params.getResultsFile();
 			OutputFactory.createSimulationReporter(results, locationManager.getAgents(), resources.getNumPercentileBins(), scheduler);
 			
 			model = new DefaultModel(scheduler, params.getIntervalSize(), params.getNumSteps());

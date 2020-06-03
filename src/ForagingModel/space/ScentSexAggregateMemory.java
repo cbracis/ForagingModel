@@ -85,6 +85,9 @@ public class ScentSexAggregateMemory extends AbstractMemory implements
 		RealVector resourceProbs = resourceMemory.getAngularProbabilities(currentLocation);
 		RealVector conspecificSafety = scentHistory.getConspecificSafety(currentLocation);
 		RealVector femalesProbs = femaleHistory.getAngularProbabilities(currentLocation);
+
+		// resource and scent already use same probCache, but need to save femaleProbs
+		probabilityCache.updateAttractiveScent(femalesProbs);
 		
 		// for now add resource and female probs then renormalize, but obs other appraoches
 		// such as first adding the matrices, then calculating the probablitites
@@ -101,7 +104,7 @@ public class ScentSexAggregateMemory extends AbstractMemory implements
 			normalizeVector(aggregateProbs);
 		}
 		
-		probabilityCache.updateAggregate(aggregateProbs, 0);
+		probabilityCache.updateAggregate(aggregateProbs);
 		
 		return aggregateProbs;
 	}

@@ -40,9 +40,17 @@ public class OutputFactory
 		return visualizer;
 	}
 
+	public static SimulationVisualizer createSimulationVisualizer(LocationManager locationManager, File resultsFile, Scheduler scheduler) 
+	{
+		SimulationVisualizer visualizer =  new FileVisualizer(locationManager, resultsFile, Parameters.get().getBurnInSteps());
+		scheduler.register(visualizer, SchedulePriority.Visualize);
+		return visualizer;
+	}
+
 	public static MovieCreator createMovieCreator()
 	{
 		return new MovieCreator();
 	}
+
 
 }

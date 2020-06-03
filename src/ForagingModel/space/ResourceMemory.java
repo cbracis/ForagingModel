@@ -160,10 +160,8 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 		probs.mapToSelf(new EnsurePositive());
 		assert(probs.getMinValue() >= 0);
 		
-		double sum = MatrixUtils.sum(probs);
-
 		normalizeVector(probs);
-		probabilityCache.updateForaging(probs, sum);
+		probabilityCache.updateForaging(probs);
 		
 		return probs;
 	}
