@@ -84,7 +84,7 @@ public class ScentSexAggregateMemory extends AbstractMemory implements
 	{
 		RealVector resourceProbs = resourceMemory.getAngularProbabilities(currentLocation);
 		RealVector conspecificSafety = scentHistory.getConspecificSafety(currentLocation);
-		RealVector femalesProbs = femaleHistory.getAngularProbabilities(currentLocation);
+		RealVector femalesProbs = femaleHistory.getScentAttractionProbabilities(currentLocation);
 
 		// resource and scent already use same probCache, but need to save femaleProbs
 		probabilityCache.updateAttractiveScent(femalesProbs);
@@ -107,6 +107,12 @@ public class ScentSexAggregateMemory extends AbstractMemory implements
 		probabilityCache.updateAggregate(aggregateProbs);
 		
 		return aggregateProbs;
+	}
+
+	// so that this can be used to create the feeding behavior that also avoids scent
+	public MemoryAssemblage getScentHistory() 
+	{
+		return this.scentHistory;
 	}
 
 }

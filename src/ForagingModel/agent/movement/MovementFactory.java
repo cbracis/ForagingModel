@@ -12,8 +12,10 @@ import ForagingModel.space.AggregateMemory;
 import ForagingModel.space.LocationManager;
 import ForagingModel.space.MemoryAssemblage;
 import ForagingModel.space.ResourceAssemblage;
+import ForagingModel.space.ScentAggregateMemory;
 import ForagingModel.space.ScentHistory;
 import ForagingModel.space.ScentManager;
+import ForagingModel.space.ScentSexAggregateMemory;
 import ForagingModel.space.SpaceFactory;
 
 public class MovementFactory 
@@ -53,22 +55,30 @@ public class MovementFactory
 			memory = SpaceFactory.createMemoryAssemblage(resources, 
 					predatorManager, scentManager, femalesHistory, scheduler);
 			
-			MemoryAssemblage predatorMemory = null;
+			MemoryAssemblage avoidanceMemory = null;
 			if (memory instanceof AggregateMemory)
 			{
-				predatorMemory = ((AggregateMemory)memory).getPredatorMemory();
+				avoidanceMemory = ((AggregateMemory)memory).getPredatorMemory();
+			}
+			else if (memory instanceof ScentAggregateMemory)
+			{
+				avoidanceMemory = ((ScentAggregateMemory)memory).getScentHistory();
+			}
+			else if (memory instanceof ScentSexAggregateMemory)
+			{
+				avoidanceMemory = ((ScentSexAggregateMemory)memory).getScentHistory();
 			}
 			
 			switch(params.getMovementProcess())
 			{
 			case Correlated:
-				movement = createCorrelatedMemoryDirectionalMovement(memory, predatorMemory, averageConsumption, locationManager, predatorManager, startingLocation, recorder);
+				movement = createCorrelatedMemoryDirectionalMovement(memory, avoidanceMemory, averageConsumption, locationManager, predatorManager, startingLocation, recorder);
 				break;
 			case ContinuousCorrelated:
-				movement = createContinuousCorrelatedMemoryDirectionalMovement(memory, predatorMemory, averageConsumption, locationManager, predatorManager, startingLocation, recorder, scheduler);
+				movement = createContinuousCorrelatedMemoryDirectionalMovement(memory, avoidanceMemory, averageConsumption, locationManager, predatorManager, startingLocation, recorder, scheduler);
 				break;
 			case OU:
-				movement = createOUMemoryDirectionalMovement(memory, predatorMemory, averageConsumption, locationManager, predatorManager, startingLocation, recorder);
+				movement = createOUMemoryDirectionalMovement(memory, avoidanceMemory, averageConsumption, locationManager, predatorManager, startingLocation, recorder);
 				break;
 			case Straight:
 			case Mixed:

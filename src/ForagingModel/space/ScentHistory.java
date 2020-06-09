@@ -9,7 +9,6 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.FastMath;
 
-import ForagingModel.core.EnsurePositive;
 import ForagingModel.core.GridPoint;
 import ForagingModel.core.MatrixUtils;
 import ForagingModel.core.NdPoint;
@@ -131,8 +130,8 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 		return null;
 	}
 
-	@Override
-	protected RealVector getAngularProbabilities(NdPoint currentLocation) 
+	// this is called by ScentSexAggregateMemory for male attraction to females
+	protected RealVector getScentAttractionProbabilities(NdPoint currentLocation) 
 	{
 		// Needed for the case of males attracted to females
 		List<Double> angles = angProbInfo.getAngles();
@@ -161,6 +160,16 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 
 	}
 	
+	// This returns probabilities by NORMALIZING safety so they add to one, called by feeding behavior to avoid scent while feeding
+	@Override
+	protected RealVector getAngularProbabilities(NdPoint currentLocation) 
+	{
+		// TODO this call updates probability cache, copying or else don't plot well but inefficient
+		RealVector probs = getConspecificSafety(currentLocation).copy();
+		MatrixUtils.normalize(probs);
+		return probs;
+	}
+
 	// This is called by AggregateScentMemory to get the safety values to multiply resource memory
 	protected RealVector getConspecificSafety(NdPoint currentLocation) 
 	{

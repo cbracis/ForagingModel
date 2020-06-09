@@ -94,4 +94,10 @@ public class ScentAggregateMemory extends AbstractMemory implements
 		return aggregateProbs;
 	}
 
+	// so that this can be used to create the feeding behavior that also avoids scent
+	public MemoryAssemblage getScentHistory() 
+	{
+		return this.scentHistory;
+	}
+
 }
