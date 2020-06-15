@@ -20,6 +20,7 @@ public class Forager extends Agent implements MovingAgent
 	private static int currentAvailableId = 0;
 	private int id;
 	private Sex sex;
+	private int lifespan;
 	
 	private LocationManager space;
 	private ResourceAssemblage resource;
@@ -32,12 +33,13 @@ public class Forager extends Agent implements MovingAgent
 	
 	private double currentConsumption = 0;
 	
-	protected Forager(LocationManager space, Sex sex,
+	protected Forager(LocationManager space, Sex sex, int lifespan,
 			ResourceAssemblage resource, MovementBehavior movementBehavior, Recorder recorder,
 			double averageConsumption, double consumptionRate, double consumptionSpatialScale)
 	{
 		this.space = space;
 		this.sex = sex;
+		this.lifespan = lifespan;
 		this.resource = resource;
 		this.movementBehavior = movementBehavior;
 		this.recorder = recorder;
@@ -116,20 +118,24 @@ public class Forager extends Agent implements MovingAgent
 	@Override
 	public void execute(int currentInterval, int priority) 
 	{
-		// Move and consume separately so that in the case of multiple foragers all foragers move before consuming
-		// Record as part of consume since that happens last
-		if (SchedulePriority.fromValue(priority).equals(SchedulePriority.ForagerMove))
+		// only if not already dead 
+		if (currentInterval <= lifespan)
 		{
-			move();
-		}
-		else if (SchedulePriority.fromValue(priority).equals(SchedulePriority.ForagerConsume))
-		{
-			consumeResource();
-			recorder.recordIteration(); // move to next iteration to record
-		}
-		else
-		{
-			throw new ForagingModelException("Unexpected priority " + priority);
+			// Move and consume separately so that in the case of multiple foragers all foragers move before consuming
+			// Record as part of consume since that happens last
+			if (SchedulePriority.fromValue(priority).equals(SchedulePriority.ForagerMove))
+			{
+				move();
+			}
+			else if (SchedulePriority.fromValue(priority).equals(SchedulePriority.ForagerConsume))
+			{
+				consumeResource();
+				recorder.recordIteration(); // move to next iteration to record
+			}
+			else
+			{
+				throw new ForagingModelException("Unexpected priority " + priority);
+			}
 		}
 	}
 	

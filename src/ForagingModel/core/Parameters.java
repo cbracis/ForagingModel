@@ -3,6 +3,7 @@ package ForagingModel.core;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ public class Parameters
 							SaveTracks,
 							NumSteps, // nSteps 
 							BurnInSteps,
+							Lifespan,
 							RepeatSimulation,
 							NumThreads,
 							ResourceLandscapeFileName,
@@ -98,7 +100,9 @@ public class Parameters
 	private Map<Parameter, ParameterType> types;
 
 	private List<NdPoint> startPoints;
+	private List<Integer> lifespans;
 	private int startPointIndex;
+	private int lifespanIndex;
 	
 	private final String OUTPUT_DIR = "output";
 	private final String R_FILE = "Visualizer.R";
@@ -235,6 +239,9 @@ public class Parameters
 		values.put( Parameter.BurnInSteps, 0 );
 		types.put( Parameter.BurnInSteps, ParameterType.Integer );
 
+		values.put( Parameter.Lifespan, null );
+		types.put( Parameter.Lifespan, ParameterType.String );
+
 		values.put( Parameter.RepeatSimulation, 1 );
 		types.put( Parameter.RepeatSimulation, ParameterType.Integer );
 
@@ -318,6 +325,7 @@ public class Parameters
 	protected void init()
 	{
 		initStartPoints();
+		initLifespans();
 	}
 	
 	public static synchronized void resetToDefaults()
@@ -687,6 +695,11 @@ public class Parameters
 	{
 		return (Integer) values.get(Parameter.BurnInSteps);
 	}
+	
+	private String getLifespans()
+	{
+		return (String) values.get(Parameter.Lifespan);
+	}
 
 	public int getRepeatSimulation()
 	{
@@ -897,6 +910,27 @@ public class Parameters
 		return startingLocation;
 	}
 	
+	public int getForagerLifespan()
+	{
+		int lifespan;
+		
+		if (null == lifespans)
+		{
+			lifespan = Integer.MAX_VALUE;
+		} else
+		{
+			lifespan = lifespans.get(lifespanIndex);
+			lifespanIndex++;
+			
+			if (lifespanIndex >= lifespans.size())
+			{
+				// automatically wrap around and re-use, like start points
+				lifespanIndex = 0;
+			}
+		}
+		return lifespan;
+	}
+	
 	private NdPoint getNextStartPointFromFile()
 	{
 		if (null == startPoints)
@@ -1004,6 +1038,20 @@ public class Parameters
 		StartPointReader spReader = InputFactory.createStartPointReader();
 		startPoints = spReader.readStartPointsFile(getStartPointsFile());
 		startPointIndex = 0;
+	}
+	
+	private void initLifespans()
+	{
+		String lifespanValues = getLifespans();
+		
+		if (null != lifespanValues)
+		{
+			lifespans = new ArrayList<Integer>();
+			for (String s : lifespanValues.split(","))
+			{
+			    lifespans.add(Integer.parseInt(s));
+			}
+		}
 	}
 
 }

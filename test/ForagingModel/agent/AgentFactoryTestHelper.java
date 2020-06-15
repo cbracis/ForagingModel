@@ -7,11 +7,11 @@ import ForagingModel.space.ResourceAssemblage;
 
 public class AgentFactoryTestHelper 
 {
-	public static Forager createForager(LocationManager space, Sex sex,
+	public static Forager createForager(LocationManager space, Sex sex, int lifespan,
 			ResourceAssemblage resource, MovementBehavior movement, Recorder recorder,
 			double averageConsumption, double consumptionRate, double consumptionSpatialScale)
 	{
-		return AgentFactory.createForager(space, sex, resource, movement, recorder, 
+		return AgentFactory.createForager(space, sex, lifespan, resource, movement, recorder, 
 				averageConsumption, consumptionRate, consumptionSpatialScale);
 	}
 	

@@ -74,6 +74,7 @@ public class SimulationFileWriter implements SimulationReporter
 				Parameter.StartPointsFileName,
 				Parameter.VisualizeSimulation,
 				Parameter.VisualizeProbabilities,
+				Parameter.Lifespan,
 				// old memory destination version of model
 				Parameter.MemoryAlpha,
 				Parameter.MemoryArrivalRadius,

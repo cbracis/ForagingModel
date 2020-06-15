@@ -37,7 +37,7 @@ public class ForagerTest
 		MovementBehavior movement = Mockito.mock(MovementBehavior.class);
 		Mockito.when(movement.escapedPredator()).thenReturn(false);
 		Forager forager = AgentFactory.createForager(locationManager, 
-				Sex.Unknown, resource, movement, 
+				Sex.Unknown, Integer.MAX_VALUE, resource, movement, 
 				AgentFactory.createRecorder(10, 0, 10, 1, null), 1, 2, 1);
 		double amtConsumed = 1.2;
 		
@@ -54,7 +54,7 @@ public class ForagerTest
 		MovementBehavior movement = Mockito.mock(MovementBehavior.class);
 		LocationManager locationManager = SpaceFactory.createLocationManager(10);
 
-		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, resource, movement, recorder, 1, 2, 1);
+		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, Integer.MAX_VALUE, resource, movement, recorder, 1, 2, 1);
 		NdPoint location = new NdPoint(5, 5);
 		locationManager.moveTo(forager, location);
 		
@@ -76,7 +76,7 @@ public class ForagerTest
 		LocationManager locationManager = SpaceFactory.createLocationManager(100);
 		MovementBehavior movement = MovementFactoryTestHelper.createStraightMovement(moveSpeed, Velocity.createPolar(moveSpeed, moveAngle), 0, 100, 1);
 		
-		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, resource, movement, recorder, 1, 2, 1);
+		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, Integer.MAX_VALUE, resource, movement, recorder, 1, 2, 1);
 		locationManager.moveTo(forager, new NdPoint(1, 1));
 
 		forager.move();
@@ -100,7 +100,7 @@ public class ForagerTest
 		MovementBehavior movement = Mockito.mock(MovementBehavior.class);
 		Mockito.when(movement.getNextVelocity(Mockito.any(NdPoint.class), Mockito.anyDouble())).thenReturn(Velocity.createPolar(moveSpeed, moveAngle));
 		
-		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, resource, movement, recorder, 1, 2, 1);
+		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, Integer.MAX_VALUE, resource, movement, recorder, 1, 2, 1);
 		locationManager.moveTo(forager, new NdPoint(97.6, 5)); // so will end up almost at the boundary but not quite
 
 		forager.move();
@@ -118,7 +118,7 @@ public class ForagerTest
 		
 		LocationManager locationManager = SpaceFactory.createLocationManager(100);
 
-		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, resource, null, recorder, 1, 2, 1);
+		Forager forager = AgentFactory.createForager(locationManager, Sex.Unknown, Integer.MAX_VALUE, resource, null, recorder, 1, 2, 1);
 		NdPoint start = new NdPoint(10, 10);
 		locationManager.moveTo(forager, start);
 		

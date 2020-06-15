@@ -28,7 +28,7 @@ public class LocationManagerTest
 		Mockito.when(movement.getNextVelocity(Mockito.any(NdPoint.class), Mockito.anyDouble())).thenReturn(Velocity.createPolar(2, 0));
 		Recorder recorder = Mockito.mock(Recorder.class);
 		
-		Forager forager = AgentFactoryTestHelper.createForager(locationManager, Sex.Unknown, resource, movement, recorder, 1, 2, 1);
+		Forager forager = AgentFactoryTestHelper.createForager(locationManager, Sex.Unknown, Integer.MAX_VALUE, resource, movement, recorder, 1, 2, 1);
 		locationManager.moveTo(forager, new NdPoint(97.6, 5.1)); // so will end up almost at the boundary but not quite
 
 		forager.move();

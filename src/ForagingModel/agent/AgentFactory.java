@@ -32,11 +32,12 @@ public class AgentFactory
 		double averageConsumption = resource.calculateAvgConsumptionRate(consumptionRate, consumptionSpatialScale);
 		int numIntervals = params.getNumIntervals();
 		int numBurnInIntervals = params.getNumBurnInIntervals();
+		int lifespan = params.getForagerLifespan();
 		double intervalSize = params.getIntervalSize();
 
 		Recorder recorder = AgentFactory.createRecorder(numIntervals, numBurnInIntervals, resource.getNumPercentileBins(), 
 										 intervalSize, predatorManager); // need 1 per forager
-		Forager forager = createForager(space, sex, resource, 
+		Forager forager = createForager(space, sex, lifespan, resource, 
 				MovementFactory.createMovement(resource, predatorManager, 
 						scentManager, allFemales,
 						averageConsumption, space, startingLocation, 
@@ -78,11 +79,11 @@ public class AgentFactory
 		return new Recorder(numIterations, numBurnInIterations, numQualityBins, intervalSize, predManager);
 	}
  
-	protected static Forager createForager(LocationManager space, Sex sex,
+	protected static Forager createForager(LocationManager space, Sex sex, int lifespan,
 			ResourceAssemblage resource, MovementBehavior movement, Recorder recorder,
 			double averageConsumption, double consumptionRate, double consumptionSpatialScale)
 	{
-		Forager forager = new Forager(space, sex, resource, movement, recorder, 
+		Forager forager = new Forager(space, sex, lifespan, resource, movement, recorder, 
 				averageConsumption, consumptionRate, consumptionSpatialScale);
 		ModelEnvironment.getMovementMapper().register(movement, forager);
 		
