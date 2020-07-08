@@ -126,8 +126,20 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 	@Override
 	protected RealMatrix getProbabilities(NdPoint currentLocation) 
 	{
-		// TODO needed? won't have just scent, will be part of combo with resource
+		// this is only for unused MemoryDestinationMovement
 		return null;
+	}
+
+	// This returns probabilities by NORMALIZING safety so they add to one, 
+	// called by feeding behavior to avoid scent while feeding
+	// as well as by kinesis and random walk
+	@Override
+	protected RealVector getAngularProbabilities(NdPoint currentLocation) 
+	{
+		// TODO this call updates probability cache, copying or else don't plot well but inefficient
+		RealVector probs = getConspecificSafety(currentLocation).copy();
+		MatrixUtils.normalize(probs);
+		return probs;
 	}
 
 	// this is called by ScentSexAggregateMemory for male attraction to females
@@ -160,16 +172,6 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 
 	}
 	
-	// This returns probabilities by NORMALIZING safety so they add to one, called by feeding behavior to avoid scent while feeding
-	@Override
-	protected RealVector getAngularProbabilities(NdPoint currentLocation) 
-	{
-		// TODO this call updates probability cache, copying or else don't plot well but inefficient
-		RealVector probs = getConspecificSafety(currentLocation).copy();
-		MatrixUtils.normalize(probs);
-		return probs;
-	}
-
 	// This is called by AggregateScentMemory to get the safety values to multiply resource memory
 	protected RealVector getConspecificSafety(NdPoint currentLocation) 
 	{

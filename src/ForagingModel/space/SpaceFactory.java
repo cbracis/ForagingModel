@@ -210,6 +210,37 @@ public class SpaceFactory
 		return memory;
 	}
 	
+	public static MemoryAssemblage createScentHistory(
+			ScentManager scentManager, ScentHistory femalesHistory,
+			Scheduler scheduler) 
+	{
+		MemoryAssemblage scent;
+		
+		if (null != scentManager && null == femalesHistory)
+		{
+			ScentHistory scentHistory = createScentHistory();
+			scentManager.add(scentHistory);
+			scent = scentHistory;
+		}
+		else if (null != scentManager && null != femalesHistory)
+		{
+			ScentHistory scentHistory = createScentHistory();
+			scentManager.add(scentHistory);
+			scent = createScentSexHistory(scentHistory, femalesHistory);
+		} 
+		else
+		{
+			throw new ForagingModelException("Not supported.");
+		}
+		
+		scheduler.register(scent, SchedulePriority.MemoryDecay);
+		scheduler.register(scent);
+
+		return scent;
+
+	}
+
+	
 	protected static ResourceMemory createResourceMemory(ResourceAssemblage resources)
 	{
 		return createResourceMemory(resources, Parameters.get().getIsFullyInformed());
@@ -282,6 +313,11 @@ public class SpaceFactory
 				decayRate, scentSpatialScal, scentResponseFactor, intervalSize);
 	}
 	
+	protected static ScentSexHistory createScentSexHistory(ScentHistory scentHistory, ScentHistory femaleHistory)
+	{
+		return new ScentSexHistory(scentHistory, femaleHistory);
+	}
+	
 	public static ScentHistory createAllFemalesScentHistory(Scheduler scheduler, ScentManager manager)
 	{
 		ScentHistory allFemalesHistory = createScentHistory();
@@ -317,5 +353,6 @@ public class SpaceFactory
 	{
 		return new ScentSexAggregateMemory(resourceMemory, scentHistory, femalesHistory);
 	}
+
 
 }

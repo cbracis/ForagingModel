@@ -92,58 +92,106 @@ public class MovementFactory
 			MovementProcess feeding;
 			BehaviorSwitchingRule switchingRule = createBehaviorSwitchingRule(averageConsumption);
 
-			switch(params.getMovementProcess())
+			if (params.getScentTracking())
 			{
-			case Straight:
-				searching = createStraightProcess(params.getForagerSpeedSearch());
-				feeding = createStraightProcess(params.getForagerSpeedFeeding());
-				break;
-			case OU:
-				searching = createOUProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch());
-				feeding = createOUProcess(params.getForagerSpeedFeeding(), params.getForagerTauFeeding());
-				break;
-			case Mixed:
-				searching = createStraightProcess(params.getForagerSpeedSearch());
-				feeding = createOUProcess(params.getForagerSpeedFeeding(), params.getForagerTauFeeding());
-				break;
-			case Correlated:
-				searching = createCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerAnglePersistanceSearch());
-				feeding = createCorrelatedProcess(params.getForagerSpeedFeeding(), params.getForagerAnglePersistanceFeeding());
-				break;
-			case ContinuousCorrelated:
-				searching = createContinuousCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch(), recorder, scheduler);
-				feeding = createContinuousCorrelatedProcess(params.getForagerSpeedFeeding(), params.getForagerTauFeeding(), recorder, scheduler);
-				break;
-			default:
-				throw new IllegalArgumentException("Unrecognized movement process " + params.getMovementProcess());
+				MemoryAssemblage scent = SpaceFactory.createScentHistory(scentManager, 
+						femalesHistory, scheduler);
+				switch(params.getMovementProcess())
+				{
+				case ContinuousCorrelated:
+					searching = createDirectionalContinuousCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch(),
+							scent, recorder, scheduler);
+					feeding = createDirectionalContinuousCorrelatedProcess(params.getForagerSpeedFeeding(), params.getForagerTauFeeding(),
+							scent, recorder, scheduler);					
+					break;
+				case Correlated:
+				case OU:
+				case Straight:
+				case Mixed:
+					throw new UnsupportedOperationException("Unsupported movement process for kinesis and scent: " + params.getMovementProcess());
+				default:
+					throw new IllegalArgumentException("Unrecognized movement process " + params.getMovementProcess());
+				}
+
+			}
+			else // no scent tracking
+			{
+				switch(params.getMovementProcess())
+				{
+				case Straight:
+					searching = createStraightProcess(params.getForagerSpeedSearch());
+					feeding = createStraightProcess(params.getForagerSpeedFeeding());
+					break;
+				case OU:
+					searching = createOUProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch());
+					feeding = createOUProcess(params.getForagerSpeedFeeding(), params.getForagerTauFeeding());
+					break;
+				case Mixed:
+					searching = createStraightProcess(params.getForagerSpeedSearch());
+					feeding = createOUProcess(params.getForagerSpeedFeeding(), params.getForagerTauFeeding());
+					break;
+				case Correlated:
+					searching = createCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerAnglePersistanceSearch());
+					feeding = createCorrelatedProcess(params.getForagerSpeedFeeding(), params.getForagerAnglePersistanceFeeding());
+					break;
+				case ContinuousCorrelated:
+					searching = createContinuousCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch(), recorder, scheduler);
+					feeding = createContinuousCorrelatedProcess(params.getForagerSpeedFeeding(), params.getForagerTauFeeding(), recorder, scheduler);
+					break;
+				default:
+					throw new IllegalArgumentException("Unrecognized movement process " + params.getMovementProcess());
+				}
 			}
 			movement = createKineticMovement(searching, feeding, switchingRule, recorder, predatorManager, 
 					params.getPredatorEncounterRadius(), params.getPredatorEncounterBehavior());
 			break;
 			
 		case SingleState:
-			switch(params.getMovementProcess())
+			if (params.getScentTracking())
 			{
-			case Straight:
-				movement = createSingleStateMovement(createStraightProcess(params.getForagerSpeedSearch()), 
-						recorder, predatorManager);
-				break;
-			case OU:
-				movement = createSingleStateMovement(createOUProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch()), 
-						recorder, predatorManager);
-				break;
-			case Mixed:
-				throw new IllegalStateException("Cannot have a mixed movement process for single state movement.");
-			case Correlated:
-				movement = createSingleStateMovement(createCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerAnglePersistanceSearch()), 
-						recorder, predatorManager);
-				break;
-			case ContinuousCorrelated:
-				movement = createSingleStateMovement(createContinuousCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch(), recorder, scheduler), 
-						recorder, predatorManager);
-				break;
-			default:
-				throw new IllegalArgumentException("Unrecognized movement process " + params.getMovementProcess());
+				MemoryAssemblage scent = SpaceFactory.createScentHistory(scentManager, 
+						femalesHistory, scheduler);
+				switch(params.getMovementProcess())
+				{
+				case ContinuousCorrelated:
+					movement = createSingleStateMovement(
+							createDirectionalContinuousCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch(), scent, recorder, scheduler), 
+							recorder, predatorManager);
+					break;
+				case Correlated:
+				case OU:
+				case Straight:
+				case Mixed:
+					throw new UnsupportedOperationException("Unsupported movement process for singlestate and scent: " + params.getMovementProcess());
+				default:
+					throw new IllegalArgumentException("Unrecognized movement process " + params.getMovementProcess());
+				}
+			}
+			else // no scent tracking
+			{
+				switch(params.getMovementProcess())
+				{
+				case Straight:
+					movement = createSingleStateMovement(createStraightProcess(params.getForagerSpeedSearch()), 
+							recorder, predatorManager);
+					break;
+				case OU:
+					movement = createSingleStateMovement(createOUProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch()), 
+							recorder, predatorManager);
+					break;
+				case Mixed:
+					throw new IllegalStateException("Cannot have a mixed movement process for single state movement.");
+				case Correlated:
+					movement = createSingleStateMovement(createCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerAnglePersistanceSearch()), 
+							recorder, predatorManager);
+					break;
+				case ContinuousCorrelated:
+					movement = createSingleStateMovement(createContinuousCorrelatedProcess(params.getForagerSpeedSearch(), params.getForagerTauSearch(), recorder, scheduler), 
+							recorder, predatorManager);
+					break;
+				default:
+					throw new IllegalArgumentException("Unrecognized movement process " + params.getMovementProcess());
+				}
 			}
 			break;
 		default:
