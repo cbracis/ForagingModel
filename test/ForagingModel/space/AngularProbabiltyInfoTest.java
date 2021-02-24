@@ -227,10 +227,10 @@ public class AngularProbabiltyInfoTest
 					
 					for (NdPoint foragerLoc : foragerLocs)
 					{
-						ResourceMemory resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, standardInfo, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0);
+						ResourceMemory resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, standardInfo, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0, 0);
 						RealVector standardProbs = resourceMemory.getAngularProbabilities(foragerLoc);
 					
-						resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, info, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0);
+						resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, info, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0, 0);
 						RealVector comparisonProbs = resourceMemory.getAngularProbabilities(foragerLoc);
 						double mse = computeMse(standardProbs, comparisonProbs);
 						totalMse += mse;
@@ -356,7 +356,7 @@ public class AngularProbabiltyInfoTest
 				
 				ResourceAssemblage resources = SpaceFactory.generateResource(resourceData, ScheduleFactory.createNoOpScheduler());
 				
-				ResourceMemory resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, standardInfo, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0);
+				ResourceMemory resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, standardInfo, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0, 0);
 				RealVector standardResourceProbs = resourceMemory.getAngularProbabilities(foragerLoc);
 
 				// predator
@@ -389,7 +389,7 @@ public class AngularProbabiltyInfoTest
 					AngularProbabilityInfo info = angProbInfos.get(i);
 					
 					// resource	
-					resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, info, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0);
+					resourceMemory = SpaceFactory.createResourceMemory(resources.getInitialMemory(true, 0), resources, info, 0, 0, 0, 0, 0, 0, 0, 0, memorySpatialScale, 0, 0);
 					RealVector comparisonProbs = resourceMemory.getAngularProbabilities(foragerLoc);
 					double mse = computeMse(standardResourceProbs, comparisonProbs);
 					resourceMse.set(i, resourceMse.get(i) + mse);

@@ -98,7 +98,7 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 		for(Double distance : distances)
 		{
 			newAmount += depositionRate * Math.exp(-distance * distance / depositionSpatialScale) / 
-					(2 * Math.PI * depositionSpatialScale);
+					(2 * Math.PI * depositionSpatialScale) * (MAX_SCENT_VALUE - scent) * intervalSize;
 		}
 		// TODO need to check for max??
 		scentMatrix.setEntry(row, column, scent + newAmount);

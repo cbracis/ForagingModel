@@ -200,7 +200,7 @@ public class AbstractMemoryTest
 		RealMatrix longMemories = new Array2DRowRealMatrix(gridSize, gridSize);
 		AngularProbabilityInfo angProbInfo = AngularProbabilityInfo.create();
 		ResourceMemory resourceMemory = new ResourceMemory(shortMemories, longMemories, mockResources, angProbInfo,
-				0.7, 0.7, 1, 1, 0.1, 0.1, 1, 1, 1, 1);
+				0.7, 0.7, 1, 1, 0.1, 0.1, 1, 1, 1, 0, 1);
 
 		
 		PredatorManager predatorManager = Mockito.mock(PredatorManager.class);

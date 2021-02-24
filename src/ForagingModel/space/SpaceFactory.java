@@ -250,25 +250,27 @@ public class SpaceFactory
 	{
 		Parameters params = Parameters.get();
 		
-		RealMatrix initialMemoryValues = resources.getInitialMemory(fullyInformed, params.getInitialValueUninformedMemory());
+		RealMatrix initialMemoryValues = resources.getInitialMemory(fullyInformed, params.getMemoryValueUninformed());
 		ResourceMemory memory = (ResourceMemory) createResourceMemory(initialMemoryValues, resources, 
 				AngularProbabilityInfo.create(),
 				params.getShortLearningRate(), params.getLongLearningRate(), 
 				params.getShortSpatialScale(), params.getLongSpatialScale(), 
 				params.getShortDecayRate(), params.getLongDecayRate(), 
 				params.getShortMemoryFactor(), params.getMemoryAlpha(), 
-				params.getMemorySpatialScaleForaging(), params.getIntervalSize());
+				params.getMemorySpatialScaleForaging(), params.getMemoryValueUninformed(),
+				params.getIntervalSize());
 		return memory;
 	}
 
 	protected static ResourceMemory createResourceMemory(RealMatrix longMemories, ResourceAssemblage resources, AngularProbabilityInfo angProbInfo,
             double shortLearningRate, double longLearningRate, double shortSpatialScale, double longSpatialScale, 
             double shortDecayRate, double longDecayRate, double shortMemoryFactor, 
-            double alpha, double memorySpatialScale, double intervalSize)
+            double alpha, double memorySpatialScale, double memoryValueUninformed, double intervalSize)
 	{
 		return new ResourceMemory(longMemories, resources, angProbInfo,
 				shortLearningRate, longLearningRate, shortSpatialScale, longSpatialScale, 
-				shortDecayRate, longDecayRate, shortMemoryFactor, alpha, memorySpatialScale, intervalSize);
+				shortDecayRate, longDecayRate, shortMemoryFactor, alpha, memorySpatialScale, 
+				memoryValueUninformed, intervalSize);
 	}
 
 	protected static PredatorMemory createPredatorMemory(PredatorManager predators)

@@ -608,7 +608,7 @@ public class Parameters
 		return (Boolean) values.get(Parameter.MemoryIsFullyInformed);
 	}
 	
-	public double getInitialValueUninformedMemory() 
+	public double getMemoryValueUninformed() 
 	{
 		return (Double) values.get(Parameter.MemoryValueUninformed);
 	}

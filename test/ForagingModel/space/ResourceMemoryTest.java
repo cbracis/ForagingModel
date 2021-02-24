@@ -56,7 +56,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				0.7, 0.7, 1, 1, 0.1, 0.1, 1, 1, 1, 1);
+				0.7, 0.7, 1, 1, 0.1, 0.1, 1, 1, 1, 0, 1);
 		memory.learn(0, 0, 0.1, 0.5);
 		Assert.assertTrue(shortMemories.getEntry(0, 0) > 0, "short memory value increased");
 		Assert.assertTrue(longMemories.getEntry(0, 0) > 0, "long memory value increased");
@@ -65,7 +65,7 @@ public class ResourceMemoryTest
 		MatrixUtils.set(shortMemories, 0);
 		MatrixUtils.set(longMemories, 0);
 		memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				0.7, 0.9, 1, 1, 0.1, 0.1, 1, 1, 1, 1);
+				0.7, 0.9, 1, 1, 0.1, 0.1, 1, 1, 1, 0, 1);
 		memory.learn(0, 0, 0.1, 0.5);
 		Assert.assertTrue(shortMemories.getEntry(0, 0) > 0, "short memory value increased");
 		Assert.assertTrue(longMemories.getEntry(0, 0) > 0, "long memory value increased");
@@ -74,7 +74,7 @@ public class ResourceMemoryTest
 		MatrixUtils.set(shortMemories, 0);
 		MatrixUtils.set(longMemories, 0);
 		memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				0.3, 0.29, 1, 1, 0.1, 0.1, 1, 1, 1, 1);
+				0.3, 0.29, 1, 1, 0.1, 0.1, 1, 1, 1, 0, 1);
 		memory.learn(0, 0, 0.1, 0.5);
 		Assert.assertTrue(shortMemories.getEntry(0, 0) > 0, "short memory value increased");
 		Assert.assertTrue(longMemories.getEntry(0, 0) > 0, "long memory value increased");
@@ -91,7 +91,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				1, 1, 1, 1, 0.1, 0.1, factor, 1, 1, 1);
+				1, 1, 1, 1, 0.1, 0.1, factor, 1, 1, 0, 1);
 		memory.learn(0, 0, 0.1, 0.5);
 
 		// since short and long have same rates, and factor is 2 (and no decay)
@@ -107,7 +107,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ intrinsicQuality - 0.1 }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				0, 0.9, 1, 1, 0.1, 0.1, 1, 1, 1, 1);
+				0, 0.9, 1, 1, 0.1, 0.1, 1, 1, 1, 0, 1);
 
 		for (int i = 0; i < 10000; i++)
 		{
@@ -126,7 +126,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ initial }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				1, 1, 1, 1, decay, decay, 1, 1, 1, 1);
+				1, 1, 1, 1, decay, decay, 1, 1, 1, 0, 1);
 
 		Assert.assertEquals(memory.getMemoryValue(0, 0), initial, "starting value");
 
@@ -148,7 +148,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ initial }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				1, 1, 1, 1, decay, decay, 1, 1, 1, 1);
+				1, 1, 1, 1, decay, decay, 1, 1, 1, 0, 1);
 
 		Assert.assertEquals(memory.getMemoryValue(0, 0), initial, "starting value");
 
@@ -170,7 +170,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ initial }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				1, 1, 1, 1, decay, decay, 1, 1, 1, 1);
+				1, 1, 1, 1, decay, decay, 1, 1, 1, 0, 1);
 
 		Assert.assertEquals(memory.getMemoryValue(0, 0), initial, "starting value");
 
@@ -192,7 +192,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				1, 1, 1, 1, decayShort, decayLong, 1, 1, 1, 1);
+				1, 1, 1, 1, decayShort, decayLong, 1, 1, 1, 0, 1);
 
 		Assert.assertEquals(memory.getMemoryValue(0, 0), 0.0, "starting value");
 
@@ -210,7 +210,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 0, 1);
 
 		memory.decay();
 
@@ -223,7 +223,7 @@ public class ResourceMemoryTest
 		RealMatrix shortMemories = new Array2DRowRealMatrix(new double[][] {{ 0 }});
 		RealMatrix longMemories = new Array2DRowRealMatrix(new double[][] {{ 0.01 }});
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, mockResources, mockAngInfo,
-				1, 1, 1, 1, 0.9, 0.9, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.9, 0.9, 1, 1, 1, 0, 1);
 
 		for (int i = 0; i < 10000; i++)
 		{
@@ -240,7 +240,7 @@ public class ResourceMemoryTest
 		RealMatrix resources = new Array2DRowRealMatrix(new double[][] {{ 1, 1 }, { 1, 1 }});
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 0, 1);
 
 		memory.learn(new NdPoint(1.1, 0.5));
 		Assert.assertEquals(shortMemories, longMemories, "same learning rate");
@@ -258,11 +258,11 @@ public class ResourceMemoryTest
 		NdPoint location = new NdPoint(2.6, 2.7);
 		
 		ResourceMemory memoryTs1 = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 0, 1);
 		ResourceMemory memoryTsPoint1 = new ResourceMemory(shortMemories.copy(), longMemories.copy(), resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 0.1);
+				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 0, 0.1);
 		ResourceMemory memoryTs2 = new ResourceMemory(shortMemories.copy(), longMemories.copy(), resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 2);
+				1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 0, 2);
 		
 		memoryTs1.learn(location);
 		
@@ -290,11 +290,11 @@ public class ResourceMemoryTest
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		
 		ResourceMemory memoryTs1 = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		ResourceMemory memoryTsPoint1 = new ResourceMemory(shortMemories.copy(), longMemories.copy(), resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.1, 0.01, 1, 1, 1, 0.1);
+				1, 1, 1, 1, 0.1, 0.01, 1, 1, 1, 0, 0.1);
 		ResourceMemory memoryTs2 = new ResourceMemory(shortMemories.copy(), longMemories.copy(), resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.1, 0.01, 1, 1, 1, 2);
+				1, 1, 1, 1, 0.1, 0.01, 1, 1, 1, 0, 2);
 		
 		memoryTs1.decay();
 		
@@ -325,7 +325,7 @@ public class ResourceMemoryTest
 		RealMatrix expected = new Array2DRowRealMatrix(new double[][] {{ 8, -2 }, { 5, -1.5 }});
 
 		ResourceMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.5, shortMemoryFactor, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.5, shortMemoryFactor, 1, 1, 0, 1);
 		double[][] state = memory.reportCurrentState(State.Resource);
 		
 		TestUtilities.compareMatrix(new Array2DRowRealMatrix(state), expected, 1e-10);
@@ -354,7 +354,7 @@ public class ResourceMemoryTest
 		RealMatrix longMemories = MatrixUtils.createMatrix(5, 5, 0);
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		
 		NdPoint location = new NdPoint(2.5, 2.5);
 		NdPoint destination = memory.getDestinationProbabalistic(location);
@@ -369,7 +369,7 @@ public class ResourceMemoryTest
 		RealMatrix longMemories = MatrixUtils.createMatrix(5, 5, 0.001);
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		
 		NdPoint location = new NdPoint(2.5, 2.5);
 		NdPoint destination = memory.getDestinationProbabalistic(location);
@@ -390,7 +390,7 @@ public class ResourceMemoryTest
 		longMemories.setEntry(4, 4, 0.01);
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, mockAngInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		
 		NdPoint location = new NdPoint(2.5, 2.5);
 		NdPoint destination = memory.getDestinationProbabalistic(location);
@@ -476,14 +476,15 @@ public class ResourceMemoryTest
 	{
 		Parameters params = Parameters.get();
 		
-		RealMatrix initialMemoryValues = resources.getInitialMemory(params.getIsFullyInformed(), params.getInitialValueUninformedMemory());
+		RealMatrix initialMemoryValues = resources.getInitialMemory(params.getIsFullyInformed(), params.getMemoryValueUninformed());
 		ResourceMemory memory = (ResourceMemory) SpaceFactory.createResourceMemory(initialMemoryValues, resources, 
 				AngularProbabilityInfo.create(),
 				params.getShortLearningRate(), params.getLongLearningRate(), 
 				params.getShortSpatialScale(), params.getLongSpatialScale(), 
 				params.getShortDecayRate(), params.getLongDecayRate(), 
 				params.getShortMemoryFactor(), params.getMemoryAlpha(), 
-				params.getMemorySpatialScaleForaging(), params.getIntervalSize());
+				params.getMemorySpatialScaleForaging(), params.getMemoryValueUninformed(), 
+				params.getIntervalSize());
 		return memory;
 
 	}
@@ -569,7 +570,7 @@ public class ResourceMemoryTest
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AngularProbabilityInfo angInfo = AngularProbabilityInfo.create(10, 1, 10);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, angInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		
 		NdPoint location = new NdPoint(2.5, 2.5);
 		RealVector probabilities = memory.getAngularProbabilities(location);
@@ -585,7 +586,7 @@ public class ResourceMemoryTest
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AngularProbabilityInfo angInfo = AngularProbabilityInfo.create(20, 0.25, 100);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, angInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		
 		NdPoint location = new NdPoint(25, 25);
 		RealVector probabilities = memory.getAngularProbabilities(location);
@@ -601,7 +602,7 @@ public class ResourceMemoryTest
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AngularProbabilityInfo angInfo = AngularProbabilityInfo.create(20, 0.25, 8);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, angInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		NdPoint location = new NdPoint(25, 25);
 		
 		// one point with large memory
@@ -634,7 +635,7 @@ public class ResourceMemoryTest
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AngularProbabilityInfo angInfo = AngularProbabilityInfo.create(20, 0.25, 8);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, angInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		
 		// center location on grid point for ease
 		NdPoint location = new NdPoint(25.5, 25.5);
@@ -678,7 +679,7 @@ public class ResourceMemoryTest
 		ResourceMatrix resourceAssemblage = new ResourceMatrix(resources, 0.5, 1);
 		AngularProbabilityInfo angInfo = AngularProbabilityInfo.create(20, 0.25, 16);
 		AbstractMemory memory = new ResourceMemory(shortMemories, longMemories, resourceAssemblage, angInfo,
-				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 1);
+				1, 1, 1, 1, 0.5, 0.1, 1, 1, 1, 0, 1);
 		
 		// grid center
 		NdPoint location = new NdPoint(size / 2, size / 2);

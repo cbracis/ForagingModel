@@ -27,6 +27,7 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 	private double shortMemoryFactor;
 	private double alpha;
 	private double memorySpatialScale;
+	private double memoryValueUninformed;
 	private double intervalSize;
 	
 	private int rows; 
@@ -38,7 +39,7 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 						   ResourceAssemblage resources, AngularProbabilityInfo angularProbabilityInfo,
 	                       double shortLearningRate, double longLearningRate, double shortSpatialScale, double longSpatialScale, 
 	                       double shortDecayRate, double longDecayRate, double shortMemoryFactor, 
-	                       double alpha, double memorySpatialScale, double intervalSize)
+	                       double alpha, double memorySpatialScale, double memoryValueUninformed, double intervalSize)
 	{
 		super(angularProbabilityInfo);
 		this.shortMemories = shortMemories;
@@ -54,6 +55,7 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 		this.shortMemoryFactor = shortMemoryFactor;
 		this.alpha = alpha;
 		this.memorySpatialScale = memorySpatialScale;
+		this.memoryValueUninformed = memoryValueUninformed;
 		this.intervalSize = intervalSize;
 		
 		rows =  longMemories.getRowDimension();
@@ -68,12 +70,13 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 	protected ResourceMemory(RealMatrix longMemories, ResourceAssemblage resources, AngularProbabilityInfo angularProbabilityInfo,
             double shortLearningRate, double longLearningRate, double shortSpatialScale, double longSpatialScale, 
             double shortDecayRate, double longDecayRate, double shortMemoryFactor, 
-            double alpha, double memorySpatialScale, double intervalSize)
+            double alpha, double memorySpatialScale, double memoryValueUninformed, double intervalSize)
 	{
 		this(new Array2DRowRealMatrix(longMemories.getRowDimension(), longMemories.getColumnDimension()), 
 				longMemories, resources, angularProbabilityInfo,
 				shortLearningRate, longLearningRate, shortSpatialScale, longSpatialScale, 
-				shortDecayRate, longDecayRate, shortMemoryFactor, alpha, memorySpatialScale, intervalSize);
+				shortDecayRate, longDecayRate, shortMemoryFactor, alpha, memorySpatialScale, 
+				memoryValueUninformed, intervalSize);
 	}
 
 	@Override
@@ -213,8 +216,8 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 
 				// + phi.L*(Q.bar-L)
 				// + phi.S*(Q.bar-S)
-				double shortDecayAmount = shortDecayRate * shortMemory * intervalSize;
-				double longDecayAmount = longDecayRate * longMemory * intervalSize;
+				double shortDecayAmount = shortDecayRate * (shortMemory - memoryValueUninformed) * intervalSize;
+				double longDecayAmount = longDecayRate * (longMemory - memoryValueUninformed) * intervalSize;
 				
 				shortMemories.setEntry(row, column, shortMemory - shortDecayAmount);
 				longMemories.setEntry(row, column, longMemory - longDecayAmount);
