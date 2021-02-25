@@ -216,7 +216,7 @@ public class ResourceMemory extends AbstractMemory implements MemoryAssemblage
 
 				// + phi.L*(Q.bar-L)
 				// + phi.S*(Q.bar-S)
-				double shortDecayAmount = shortDecayRate * (shortMemory - memoryValueUninformed) * intervalSize;
+				double shortDecayAmount = shortDecayRate * shortMemory * intervalSize;
 				double longDecayAmount = longDecayRate * (longMemory - memoryValueUninformed) * intervalSize;
 				
 				shortMemories.setEntry(row, column, shortMemory - shortDecayAmount);

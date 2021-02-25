@@ -94,14 +94,13 @@ public class ScentHistory extends AbstractMemory implements MemoryAssemblage
 
 		// new deposit amount,D,  normal kernel, for each conspecific dist away 
 		// dDL <- beta.D * exp(-dist^2/gamma.D) / (2 * pi * gamma.D)
-		double newAmount = 0;
 		for(Double distance : distances)
 		{
-			newAmount += depositionRate * Math.exp(-distance * distance / depositionSpatialScale) / 
+			scent += depositionRate * Math.exp(-distance * distance / depositionSpatialScale) / 
 					(2 * Math.PI * depositionSpatialScale) * (MAX_SCENT_VALUE - scent) * intervalSize;
 		}
-		// TODO need to check for max??
-		scentMatrix.setEntry(row, column, scent + newAmount);
+		scent = (scent > MAX_SCENT_VALUE) ? MAX_SCENT_VALUE : scent;
+		scentMatrix.setEntry(row, column, scent);
 	}
 
 

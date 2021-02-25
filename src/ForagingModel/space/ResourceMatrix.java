@@ -116,7 +116,7 @@ public class ResourceMatrix implements ResourceAssemblage
 		// dQ <- beta.C * exp(-Dmatrix^2/gamma.C) / (2 * pi * gamma.C) * Q
 		double depletionAmount = consumptionRate * Math.exp(-distance * distance /consumptionSpatialScale) 
 				/ (2 * Math.PI * consumptionSpatialScale ) * currentQuality * intervalSize;
-		if (carryingCapacity > 0 & currentQuality - depletionAmount < MIN_DEPLETED_STATE) // avoid depleting to 0 for non-0 patches
+		if (carryingCapacity > 0 && currentQuality - depletionAmount < MIN_DEPLETED_STATE) // avoid depleting to 0 for non-0 patches
 		{
 			depletionAmount = currentQuality - MIN_DEPLETED_STATE;
 		}
