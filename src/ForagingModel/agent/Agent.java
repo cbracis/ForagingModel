@@ -15,5 +15,7 @@ public abstract class Agent implements Schedulable
 	public enum Sex { Female, Male, Unknown }
 
 	public abstract AgentType getType();
+	
+	public abstract boolean isAlive();
 
 }

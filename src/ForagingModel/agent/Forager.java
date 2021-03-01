@@ -32,6 +32,7 @@ public class Forager extends Agent implements MovingAgent
 	private double consumptionSpatialScale;
 	
 	private double currentConsumption = 0;
+	private boolean isAlive;
 	
 	protected Forager(LocationManager space, Sex sex, int lifespan,
 			ResourceAssemblage resource, MovementBehavior movementBehavior, Recorder recorder,
@@ -47,6 +48,7 @@ public class Forager extends Agent implements MovingAgent
 		this.consumptionRate = consumptionRate;
 		this.consumptionSpatialScale = consumptionSpatialScale;
 		this.id = currentAvailableId++;
+		this.isAlive = true;
 		init();
 	}
 	
@@ -136,6 +138,9 @@ public class Forager extends Agent implements MovingAgent
 			{
 				throw new ForagingModelException("Unexpected priority " + priority);
 			}
+		} else
+		{
+			isAlive = false;
 		}
 	}
 	
@@ -144,6 +149,12 @@ public class Forager extends Agent implements MovingAgent
 	public AgentType getType() 
 	{
 		return AgentType.Forager;
+	}
+
+	@Override
+	public boolean isAlive() 
+	{
+		return isAlive;
 	}
 
 }

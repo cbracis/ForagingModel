@@ -74,7 +74,8 @@ public class ScentManager implements Schedulable
 			for (Agent agent : agents)
 			{
 				// forager doesn't avoid own scent, also skip null key
-				if (agent != key && agent != null)
+				// skip removed foragers (lifespan over)
+				if (agent != key && agent != null && agent.isAlive())
 				{
 					conspecifics.add(locManager.getLocation(agent));
 				}
